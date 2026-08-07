@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Canvas Confetti Library untuk Letupan Konfeti -->
+  <!-- Canvas Confetti Library -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   
   <!-- Firebase SDK -->
@@ -24,7 +24,10 @@
 <body class="bg-gradient-to-br from-indigo-950 via-purple-900 to-fuchsia-950 min-h-screen text-white font-sans flex flex-col justify-between p-6 overflow-x-hidden">
 
   <!-- Audio Elements -->
-  <audio id="bgMusic" loop preload="auto" src="bgm.mp3"></audio>
+  <audio id="bgMusic" loop preload="auto">
+    <source src="bgm.mp3" type="audio/mpeg">
+    <source src="https://codeskulptor-demos.commondatastorage.googleapis.com/descent/background%20music.mp3" type="audio/mpeg">
+  </audio>
 
   <!-- Header -->
   <header class="flex justify-between items-center border-b border-purple-500/30 pb-4 backdrop-blur-md">
@@ -151,7 +154,7 @@
       </div>
     </div>
 
-    <!-- PRE-ANNOUNCEMENT SCREEN (BUTANG UMUM PEMENANG) -->
+    <!-- PRE-ANNOUNCEMENT SCREEN -->
     <div id="preAnnounceScreen" class="hidden w-full max-w-xl text-center bg-purple-950/90 p-8 rounded-3xl border-2 border-amber-400 backdrop-blur-2xl shadow-2xl">
       <div class="text-6xl mb-3 animate-bounce">🏆</div>
       <h2 class="text-3xl font-black text-amber-300 mb-2">PERMAINAN TAMAT!</h2>
@@ -162,7 +165,7 @@
       </button>
     </div>
 
-    <!-- PODIUM FINAL SCREEN (SKRIN PEMENANG AKHIR) -->
+    <!-- PODIUM FINAL SCREEN -->
     <div id="podiumScreen" class="hidden w-full max-w-4xl text-center bg-purple-950/80 p-8 rounded-3xl border-2 border-amber-400 backdrop-blur-2xl shadow-2xl">
       <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-pink-300 to-yellow-300 mb-2">
         🎉 TAHNIAH KEPADA PEMENANG! 🎉
@@ -171,7 +174,6 @@
 
       <!-- PODIUM TOP 3 -->
       <div class="flex justify-center items-end gap-4 my-6 min-h-[220px]">
-        <!-- Tempat Ke-2 (Perak) -->
         <div id="podium2" class="flex-1 bg-gradient-to-t from-slate-800 to-slate-700 border-2 border-slate-300 p-4 rounded-t-3xl shadow-xl flex flex-col items-center justify-end h-44">
           <div class="text-4xl mb-1">🥈</div>
           <p id="p2Name" class="font-black text-white text-lg truncate w-full">---</p>
@@ -179,7 +181,6 @@
           <span class="mt-2 text-xs font-black bg-slate-900 text-slate-300 px-3 py-1 rounded-full border border-slate-400">KE-2</span>
         </div>
 
-        <!-- Tempat Ke-1 (Emas) -->
         <div id="podium1" class="flex-1 bg-gradient-to-t from-amber-600 to-yellow-500 border-4 border-amber-200 p-4 rounded-t-3xl shadow-2xl shadow-amber-500/50 flex flex-col items-center justify-end h-56 transform -translate-y-2">
           <div class="text-6xl mb-1 animate-bounce">🏆</div>
           <p id="p1Name" class="font-black text-slate-950 text-xl truncate w-full">---</p>
@@ -187,7 +188,6 @@
           <span class="mt-2 text-xs font-black bg-slate-950 text-amber-300 px-4 py-1 rounded-full border border-amber-300">JUARA</span>
         </div>
 
-        <!-- Tempat Ke-3 (Gangsa) -->
         <div id="podium3" class="flex-1 bg-gradient-to-t from-amber-900 to-amber-800 border-2 border-amber-600 p-4 rounded-t-3xl shadow-xl flex flex-col items-center justify-end h-36">
           <div class="text-3xl mb-1">🥉</div>
           <p id="p3Name" class="font-black text-amber-100 text-base truncate w-full">---</p>
@@ -196,7 +196,6 @@
         </div>
       </div>
 
-      <!-- SENARAI PEMAIN KEDUKAN LEBIH BAWAH -->
       <div class="mt-6 bg-slate-950/80 p-4 rounded-2xl border border-purple-500/30 text-left">
         <h4 class="text-xs font-bold text-purple-300 mb-2 uppercase tracking-wider"><i class="fa-solid fa-list-ol mr-1"></i> Peserta Lain:</h4>
         <div id="otherPlayersList" class="flex flex-wrap gap-2 max-h-28 overflow-y-auto"></div>
@@ -224,7 +223,7 @@
     const db = firebase.database();
 
     // ----------------------------------------------------
-    // WEB AUDIO API SYSTEM (AUDIO DRUM ROLL, CYMBAL & TICK)
+    // WEB AUDIO API SYSTEM
     // ----------------------------------------------------
     let audioCtx = null;
     function getAudioContext() {
@@ -237,7 +236,6 @@
       return audioCtx;
     }
 
-    // Bunyi Detik Pemasa
     function playTickSound() {
       try {
         let ctx = getAudioContext();
@@ -254,7 +252,6 @@
       } catch(e){}
     }
 
-    // Bunyi Chime / Papan Skor
     function playChimeSound() {
       try {
         let ctx = getAudioContext();
@@ -274,7 +271,6 @@
       } catch(e){}
     }
 
-    // BUNYI DRUM ROLL (3 SAAT PALUAN DRAM SUSPEN)
     function playDrumRoll(durationMs = 3000) {
       try {
         let ctx = getAudioContext();
@@ -311,7 +307,6 @@
       } catch(e){}
     }
 
-    // BUNYI CYMBAL CRASH (HEMPASAN SIMBAL)
     function playCymbalCrash() {
       try {
         let ctx = getAudioContext();
@@ -343,7 +338,7 @@
     }
 
     // ----------------------------------------------------
-    // BANK KESEMUA 30 SOALAN LENGKAP (BEGINNER & ADVANCE)
+    // BANK SOALAN
     // ----------------------------------------------------
     const allQuestions = {
       beginner: [
@@ -441,6 +436,7 @@
       db.ref(`games/${gamePin}/settings/showQuestionOnPhone`).set(isChecked);
     }
 
+    // FUNGSI MUZIK DENGAN SMART FALLBACK
     function toggleAudio() {
       getAudioContext();
       const bg = document.getElementById('bgMusic');
@@ -448,10 +444,20 @@
       const audioText = document.getElementById('audioText');
 
       if (bg.paused) {
-        bg.play().then(() => {
-          icon.className = "fa-solid fa-volume-high text-amber-300";
-          audioText.innerText = "Muzik Dimainkan";
-        }).catch(e => console.log(e));
+        var playPromise = bg.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            icon.className = "fa-solid fa-volume-high text-amber-300";
+            audioText.innerText = "Muzik Dimainkan";
+          }).catch(error => {
+            console.log("Audio Local Fail, switching to CDN...", error);
+            // Jika bgm.mp3 gagal dipanggil, guna link CDN simpanan
+            bg.src = "https://codeskulptor-demos.commondatastorage.googleapis.com/descent/background%20music.mp3";
+            bg.play();
+            icon.className = "fa-solid fa-volume-high text-amber-300";
+            audioText.innerText = "Muzik Dimainkan";
+          });
+        }
       } else {
         bg.pause();
         icon.className = "fa-solid fa-volume-xmark";
