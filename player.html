@@ -9,82 +9,90 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
-<body class="bg-slate-950 text-white font-sans h-screen flex flex-col justify-between p-4 select-none">
+<body class="bg-gradient-to-br from-slate-950 via-purple-950 to-indigo-950 text-white font-sans h-screen flex flex-col justify-between p-4 select-none">
 
   <!-- FORM LOGIN -->
   <div id="loginForm" class="flex-1 flex flex-col justify-center items-center text-center">
-    <div class="bg-slate-900 border border-teal-500/30 p-6 rounded-3xl w-full max-w-sm shadow-2xl">
-      <i class="fa-solid fa-brain text-5xl text-teal-400 mb-3"></i>
-      <h1 class="text-xl font-bold mb-1">Masuk Permainan</h1>
-      <p class="text-xs text-teal-200/70 mb-4">"Setiap langkah kecil membawa impak besar!"</p>
+    <div class="bg-purple-900/40 border border-purple-400/30 p-6 rounded-3xl w-full max-w-sm shadow-2xl backdrop-blur-xl">
+      <div class="bg-gradient-to-tr from-pink-500 to-amber-400 p-4 rounded-2xl inline-block mb-3 shadow-lg shadow-pink-500/30">
+        <i class="fa-solid fa-brain text-4xl text-white"></i>
+      </div>
+      <h1 class="text-2xl font-black mb-1 bg-clip-text text-transparent bg-gradient-to-r from-amber-300 via-pink-300 to-cyan-300">MASUK PERMAINAN</h1>
+      <p class="text-xs text-purple-200/80 mb-5 font-medium">"Setiap fikiran positif membawa impak besar!"</p>
 
-      <input id="pinInput" type="number" placeholder="Game PIN" class="w-full text-center text-2xl font-bold bg-slate-800 border border-teal-500/50 rounded-xl p-3 mb-3 text-teal-300">
-      <input id="nameInput" type="text" placeholder="Nama Anda" class="w-full text-center text-lg bg-slate-800 border border-teal-500/50 rounded-xl p-3 mb-5 text-white">
+      <input id="pinInput" type="number" placeholder="GAME PIN" class="w-full text-center text-3xl font-black bg-slate-950 border-2 border-pink-500/50 rounded-2xl p-3 mb-3 text-amber-300 placeholder-purple-400/50 focus:outline-none focus:border-amber-400">
+      <input id="nameInput" type="text" placeholder="Nama / Gelaran Anda" class="w-full text-center text-lg font-bold bg-slate-950 border-2 border-purple-500/50 rounded-2xl p-3 mb-6 text-white placeholder-purple-400/50 focus:outline-none focus:border-pink-400">
       
-      <button onclick="joinGame()" class="w-full bg-teal-500 text-slate-950 font-black text-lg py-3 rounded-xl shadow-lg">
-        MASUK PERMAINAN
+      <button onclick="joinGame()" class="w-full bg-gradient-to-r from-amber-400 via-pink-500 to-purple-600 active:scale-95 text-slate-950 font-black text-xl py-4 rounded-2xl shadow-xl shadow-pink-500/30 transition">
+        SERTAI SEKARANG
       </button>
     </div>
   </div>
 
   <!-- WAITING SCREEN -->
   <div id="waitScreen" class="hidden flex-1 flex-col justify-center items-center text-center">
-    <i class="fa-solid fa-spinner fa-spin text-5xl text-teal-400 mb-4"></i>
-    <h2 class="text-2xl font-bold text-teal-200">Anda Sudah Berjaya Masuk!</h2>
-    <p class="text-slate-400 text-sm mt-2">Sila fokus pada Skrin Utama / TV...</p>
+    <i class="fa-solid fa-spinner fa-spin text-6xl text-amber-300 mb-4"></i>
+    <h2 class="text-2xl font-black text-amber-300">BERJAYA MASUK!</h2>
+    <p class="text-purple-200 text-sm mt-2 font-medium">Sila lihat Skrin TV / Projektor untuk soalan bermula...</p>
   </div>
 
   <!-- GAME BUTTONS SCREEN -->
   <div id="buttonScreen" class="hidden flex-1 flex-col justify-between my-2">
-    <!-- Paparan Soalan (Boleh Disorok/Dipapar oleh Admin) -->
-    <div id="questionContainer" class="bg-slate-900 border border-teal-500/40 p-4 rounded-2xl text-center mb-2">
-      <p id="playerQuestionText" class="text-md font-semibold text-slate-100">Lihat soalan di skrin TV...</p>
+    <!-- Paparan Soalan di Phone (Boleh Disorok/Dipapar oleh Admin) -->
+    <div id="questionContainer" class="bg-purple-900/50 border border-purple-400/40 p-4 rounded-2xl text-center mb-2 shadow-lg">
+      <p id="playerQuestionText" class="text-sm font-bold text-white leading-snug">Lihat soalan di skrin TV...</p>
     </div>
 
-    <div id="statusMsg" class="text-center font-bold text-sm text-amber-300 mb-2">Pilih Jawapan Anda!</div>
+    <!-- Status Respon Langsung (Betul / Salah) -->
+    <div id="feedbackBanner" class="hidden p-3 rounded-2xl text-center font-black text-lg my-2 shadow-xl animate-bounce"></div>
 
-    <div class="grid grid-cols-1 gap-3 flex-1">
-      <button onclick="sendAnswer('MITOS')" class="bg-rose-600 active:bg-rose-700 rounded-3xl border-2 border-rose-400 flex flex-col items-center justify-center gap-1 font-black text-3xl shadow-xl active:scale-95 transition">
-        <i class="fa-solid fa-xmark text-5xl"></i><span>MITOS</span>
+    <div id="statusMsg" class="text-center font-black text-sm text-amber-300 mb-2 tracking-wider">PILIH JAWAPAN ANDA!</div>
+
+    <!-- Butang Jawapan Cerah & Jelas -->
+    <div class="grid grid-cols-1 gap-4 flex-1">
+      <button id="btnMitos" onclick="sendAnswer('MITOS')" class="bg-gradient-to-r from-rose-600 to-pink-600 active:from-rose-700 rounded-3xl border-2 border-rose-300 flex flex-col items-center justify-center gap-1 text-white font-black text-4xl shadow-2xl shadow-rose-900/60 active:scale-95 transition">
+        <i class="fa-solid fa-xmark text-6xl"></i>
+        <span>MITOS</span>
       </button>
 
-      <button onclick="sendAnswer('FAKTA')" class="bg-sky-600 active:bg-sky-700 rounded-3xl border-2 border-sky-400 flex flex-col items-center justify-center gap-1 font-black text-3xl shadow-xl active:scale-95 transition">
-        <i class="fa-solid fa-check text-5xl"></i><span>FAKTA</span>
+      <button id="btnFakta" onclick="sendAnswer('FAKTA')" class="bg-gradient-to-r from-cyan-600 to-blue-600 active:from-cyan-700 rounded-3xl border-2 border-cyan-300 flex flex-col items-center justify-center gap-1 text-white font-black text-4xl shadow-2xl shadow-cyan-900/60 active:scale-95 transition">
+        <i class="fa-solid fa-check text-6xl"></i>
+        <span>FAKTA</span>
       </button>
     </div>
   </div>
 
   <!-- KAD KEMENANGAN & TEBUS HADIAH BOOTH -->
   <div id="endClaimScreen" class="hidden flex-1 flex-col justify-center items-center text-center p-2">
-    <div class="bg-gradient-to-b from-slate-900 to-indigo-950 border-2 border-amber-400 p-6 rounded-3xl w-full max-w-sm shadow-2xl relative overflow-hidden">
-      <div class="text-amber-400 text-5xl mb-2"><i class="fa-solid fa-award animate-bounce"></i></div>
+    <div class="bg-gradient-to-b from-purple-900 via-indigo-950 to-slate-950 border-4 border-amber-400 p-6 rounded-3xl w-full max-w-sm shadow-2xl relative overflow-hidden">
+      <div class="text-amber-300 text-6xl mb-2 animate-bounce"><i class="fa-solid fa-trophy"></i></div>
       <h2 class="text-2xl font-black text-white mb-1">SIJIL KEMENANGAN</h2>
-      <p class="text-xs text-teal-300 mb-4">Duta Kesedaran Kesihatan Mental</p>
+      <p class="text-xs font-bold text-amber-300 mb-4 tracking-wider">DUTA KESEDARAN KESIHATAN MENTAL</p>
 
-      <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 text-left space-y-2 mb-4">
-        <div class="flex justify-between text-sm"><span class="text-slate-400">Nama:</span> <span id="claimName" class="font-bold text-white"></span></div>
-        <div class="flex justify-between text-sm"><span class="text-slate-400">Kedudukan:</span> <span id="claimRank" class="font-extrabold text-amber-400"></span></div>
-        <div class="flex justify-between text-sm"><span class="text-slate-400">Jumlah Skor:</span> <span id="claimScore" class="font-bold text-teal-300"></span></div>
-        <div class="border-t border-slate-800 pt-2 flex justify-between text-xs"><span class="text-slate-500">Kod Sah Booth:</span> <span id="claimCode" class="font-mono text-amber-300 font-bold"></span></div>
+      <div class="bg-slate-950 p-4 rounded-2xl border border-purple-500/30 text-left space-y-2 mb-4">
+        <div class="flex justify-between text-sm"><span class="text-purple-300 font-medium">Nama:</span> <span id="claimName" class="font-black text-white"></span></div>
+        <div class="flex justify-between text-sm"><span class="text-purple-300 font-medium">Kedudukan:</span> <span id="claimRank" class="font-black text-amber-300"></span></div>
+        <div class="flex justify-between text-sm"><span class="text-purple-300 font-medium">Jumlah Skor:</span> <span id="claimScore" class="font-black text-cyan-300"></span></div>
+        <div class="border-t border-purple-900 pt-2 flex justify-between text-xs"><span class="text-purple-400">Kod Sah Booth:</span> <span id="claimCode" class="font-mono text-amber-300 font-bold"></span></div>
       </div>
 
-      <p class="text-xs text-amber-200/90 bg-amber-900/40 p-2.5 rounded-xl border border-amber-500/30 mb-2">
-        <i class="fa-solid fa-gift mr-1"></i> Tunjukkan skrin ini kepada petugas booth untuk menuntut hadiah anda!
+      <p class="text-xs text-amber-200/90 bg-amber-950/80 p-3 rounded-2xl border border-amber-500/40 mb-2 font-semibold">
+        <i class="fa-solid fa-gift mr-1 text-amber-400"></i> Tunjukkan skrin ini kepada petugas booth untuk menuntut hadiah anda!
       </p>
     </div>
   </div>
 
   <script>
     const firebaseConfig = {
-  apiKey: "AIzaSyBNWq38qyVMnJvd2Px3rIU5X-SVWuj3qZo",
-  authDomain: "mhfactvsmitosgame.firebaseapp.com",
-  databaseURL: "https://mhfactvsmitosgame-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "mhfactvsmitosgame",
-  storageBucket: "mhfactvsmitosgame.firebasestorage.app",
-  messagingSenderId: "378342614294",
-  appId: "1:378342614294:web:8c640ffcb7b314769e9c37",
-  measurementId: "G-EDSGHKYHEG"
-};
+      apiKey: "AIzaSyBNWq38qyVMnJvd2Px3rIU5X-SVWuj3qZo",
+      authDomain: "mhfactvsmitosgame.firebaseapp.com",
+      databaseURL: "https://mhfactvsmitosgame-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "mhfactvsmitosgame",
+      storageBucket: "mhfactvsmitosgame.firebasestorage.app",
+      messagingSenderId: "378342614294",
+      appId: "1:378342614294:web:8c640ffcb7b314769e9c37",
+      measurementId: "G-EDSGHKYHEG"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -98,7 +106,7 @@
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(650, audioCtx.currentTime);
         gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
         osc.connect(gain); osc.connect(audioCtx.destination);
         osc.start(); osc.stop(audioCtx.currentTime + 0.15);
@@ -112,7 +120,7 @@
     function joinGame() {
       const pin = document.getElementById('pinInput').value.trim();
       const name = document.getElementById('nameInput').value.trim();
-      if(!pin || !name) { alert("Masukkan PIN dan Nama!"); return; }
+      if(!pin || !name) { alert("Sila masukkan PIN dan Nama!"); return; }
 
       db.ref(`games/${pin}`).once('value', snapshot => {
         if(snapshot.exists()) {
@@ -124,12 +132,11 @@
           document.getElementById('waitScreen').classList.add('flex');
 
           listenToGame();
-        } else { alert("Game PIN Salah!"); }
+        } else { alert("Game PIN Salah atau Tiada!"); }
       });
     }
 
     function listenToGame() {
-      // Monitor Tetapan Papar Soalan dari Hos
       db.ref(`games/${currentGamePin}/settings/showQuestionOnPhone`).on('value', snapshot => {
         const show = snapshot.val();
         document.getElementById('questionContainer').style.display = show ? 'block' : 'none';
@@ -138,18 +145,30 @@
       // Monitor Soalan Bermula
       db.ref(`games/${currentGamePin}/currentQuestion`).on('value', snapshot => {
         if(snapshot.exists()) {
-          hasAnswered = false;
           const qData = snapshot.val();
-          document.getElementById('playerQuestionText').innerText = qData.q;
           
-          document.getElementById('waitScreen').classList.add('hidden');
-          document.getElementById('buttonScreen').classList.remove('hidden');
-          document.getElementById('buttonScreen').classList.add('flex');
-          document.getElementById('statusMsg').innerText = "Pilih Jawapan Anda!";
+          if(qData.state === 'SHOW_RESULT') {
+            // Tampilkan Maklum Balas Jawapan di Phone
+            showInstantFeedback(qData.correctAns);
+          } else {
+            // Soalan Baharu Bermula
+            hasAnswered = false;
+            document.getElementById('feedbackBanner').classList.add('hidden');
+            document.getElementById('playerQuestionText').innerText = qData.q;
+            
+            document.getElementById('btnMitos').disabled = false;
+            document.getElementById('btnFakta').disabled = false;
+            document.getElementById('btnMitos').style.opacity = "1";
+            document.getElementById('btnFakta').style.opacity = "1";
+
+            document.getElementById('waitScreen').classList.add('hidden');
+            document.getElementById('buttonScreen').classList.remove('hidden');
+            document.getElementById('buttonScreen').classList.add('flex');
+            document.getElementById('statusMsg').innerText = "PILIH JAWAPAN ANDA!";
+          }
         }
       });
 
-      // Monitor Bila Game Ditamatkan
       db.ref(`games/${currentGamePin}/status`).on('value', snapshot => {
         const status = snapshot.val();
         if(status && status.state === 'ENDED') {
@@ -162,10 +181,32 @@
       if(hasAnswered) return;
       playBeepSound(); triggerVibration();
       hasAnswered = true;
-      document.getElementById('statusMsg').innerText = `Jawapan Dihantar: ${ans} ✅`;
+      document.getElementById('statusMsg').innerText = `JAWAPAN DIHANTAR: ${ans} ✅`;
+
+      // Malapkan butang selepas jawab
+      if(ans === 'MITOS') {
+        document.getElementById('btnFakta').style.opacity = "0.3";
+      } else {
+        document.getElementById('btnMitos').style.opacity = "0.3";
+      }
 
       db.ref(`games/${currentGamePin}/answers/${playerId}`).set({
         answer: ans, timestamp: Date.now()
+      });
+    }
+
+    function showInstantFeedback(correctAns) {
+      db.ref(`games/${currentGamePin}/players/${playerId}/lastResult`).once('value', snapshot => {
+        const res = snapshot.val();
+        const banner = document.getElementById('feedbackBanner');
+        banner.classList.remove('hidden');
+        if(res && res.correct) {
+          banner.className = "p-3 rounded-2xl text-center font-black text-lg my-2 shadow-xl bg-emerald-500 text-slate-950 animate-bounce";
+          banner.innerHTML = "🎉 TEPAT! (+Mata Kelajuan)";
+        } else {
+          banner.className = "p-3 rounded-2xl text-center font-black text-lg my-2 shadow-xl bg-rose-600 text-white animate-bounce";
+          banner.innerHTML = `❌ KURANG TEPAT! (Jawapan: ${correctAns})`;
+        }
       });
     }
 
