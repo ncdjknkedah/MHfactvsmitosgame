@@ -8,32 +8,43 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    @keyframes pulse-glow {
+      0%, 100% { filter: drop-shadow(0 0 15px rgba(236, 72, 153, 0.6)); }
+      50% { filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.9)); }
+    }
+    .animate-glow { animation: pulse-glow 2.5s infinite; }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-teal-950 via-slate-900 to-indigo-950 min-h-screen text-white font-sans flex flex-col justify-between p-6">
+<body class="bg-gradient-to-br from-indigo-950 via-purple-900 to-fuchsia-950 min-h-screen text-white font-sans flex flex-col justify-between p-6 overflow-hidden">
 
-  <!-- Audio Controls -->
-  <audio id="bgMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-game-level-music-689.mp3"></audio>
+  <!-- Audio Elements -->
+  <audio id="bgMusic" loop src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73220.mp3?filename=game-music-loop-7-145285.mp3"></audio>
 
   <!-- Header -->
-  <header class="flex justify-between items-center border-b border-teal-500/30 pb-4">
-    <div class="flex items-center gap-3">
-      <i class="fa-solid fa-brain text-4xl text-teal-400 animate-pulse"></i>
+  <header class="flex justify-between items-center border-b border-purple-500/30 pb-4 backdrop-blur-md">
+    <div class="flex items-center gap-4">
+      <div class="bg-gradient-to-tr from-pink-500 to-amber-400 p-3 rounded-2xl shadow-lg shadow-pink-500/30 animate-glow">
+        <i class="fa-solid fa-brain text-3xl text-white"></i>
+      </div>
       <div>
-        <h1 class="text-2xl font-bold">Mitos & Fakta Kesihatan Mental</h1>
-        <p class="text-xs text-teal-200">Setiap fikiran positif adalah langkah menuju jiwa sejahtera!</p>
+        <h1 class="text-3xl font-black tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-amber-300 via-pink-300 to-cyan-300">
+          Mitos & Fakta Kesihatan Mental
+        </h1>
+        <p class="text-xs text-purple-200 font-medium">Cabar Minda, Hapuskan Stigma! • Interactive Quiz</p>
       </div>
     </div>
     
     <div class="flex items-center gap-3">
       <!-- Toggle Papar Soalan di Phone Pemain -->
-      <label class="flex items-center cursor-pointer bg-slate-800/80 px-4 py-2 rounded-full border border-teal-500/30 text-xs gap-2">
-        <span>Papar Soalan di Phone:</span>
+      <label class="flex items-center cursor-pointer bg-purple-900/60 px-4 py-2 rounded-full border border-purple-400/40 text-xs gap-2 shadow-inner">
+        <span class="font-bold text-purple-200">Papar Soalan di Phone:</span>
         <input type="checkbox" id="showQToggle" onchange="toggleShowQuestion()" class="sr-only peer" checked>
-        <div class="w-9 h-5 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500 relative"></div>
+        <div class="w-9 h-5 bg-purple-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-400 relative"></div>
       </label>
 
-      <button onclick="toggleAudio()" class="bg-teal-800/50 hover:bg-teal-700 border border-teal-400 px-3 py-2 rounded-full text-xs flex items-center gap-1">
-        <i id="audioIcon" class="fa-solid fa-volume-xmark"></i> Muzik
+      <button onclick="toggleAudio()" class="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 border border-pink-300/50 px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 shadow-lg transition">
+        <i id="audioIcon" class="fa-solid fa-volume-xmark"></i> Muzik Latar
       </button>
     </div>
   </header>
@@ -42,35 +53,36 @@
   <main class="flex-1 flex flex-col justify-center items-center my-4">
 
     <!-- LOBBY SCREEN -->
-    <div id="lobbyScreen" class="text-center w-full max-w-2xl bg-slate-800/60 p-6 rounded-3xl border border-teal-500/30 backdrop-blur-md shadow-2xl">
-      <i class="fa-solid fa-heart-pulse text-5xl text-teal-400 mb-2 animate-bounce"></i>
-      <h2 class="text-md text-slate-300">Imbas QR / Layari Laman Web & Masukkan PIN:</h2>
+    <div id="lobbyScreen" class="text-center w-full max-w-3xl bg-purple-900/40 p-6 rounded-3xl border border-purple-400/30 backdrop-blur-xl shadow-2xl shadow-purple-950/80">
+      <div class="inline-block bg-gradient-to-r from-pink-500 to-yellow-400 text-slate-950 text-xs font-black px-4 py-1.5 rounded-full mb-3 shadow-md tracking-wider">
+        AMBIL PHONE ANDA & SERTAI SEKARANG!
+      </div>
       
       <!-- PAPARAN QR CODE & PIN -->
-      <div class="flex flex-col md:flex-row items-center justify-center gap-6 my-4 bg-slate-900/80 p-4 rounded-2xl border border-teal-500/50">
+      <div class="flex flex-col md:flex-row items-center justify-center gap-6 my-2 bg-purple-950/80 p-5 rounded-2xl border border-pink-500/40 shadow-inner">
         <!-- QR Code -->
-        <div class="bg-white p-2 rounded-xl shadow-lg">
-          <img src="https://quickchart.io/qr?text=https://ncdjknkedah.github.io/MHfactvsmitosgame/player.html&size=140&dark=0d9488" alt="QR Code Pemain" class="w-32 h-32 rounded-lg">
+        <div class="bg-white p-2.5 rounded-2xl shadow-xl shadow-pink-500/20 transform -rotate-2 hover:rotate-0 transition">
+          <img src="https://quickchart.io/qr?text=https://ncdjknkedah.github.io/MHfactvsmitosgame/player.html&size=150&dark=4c1d95" alt="QR Code Pemain" class="w-36 h-36 rounded-xl">
         </div>
         
         <!-- Game PIN Display -->
-        <div class="text-center">
-          <p class="text-xs text-teal-300 font-semibold mb-1">KOD PERMAINAN (GAME PIN):</p>
-          <div class="text-5xl font-black text-teal-300 tracking-widest bg-slate-950 px-6 py-3 rounded-xl border border-teal-500/50 shadow-inner">
+        <div class="text-center md:text-left">
+          <p class="text-xs text-amber-300 font-bold tracking-wider mb-1">GAME PIN / KOD PERMAINAN:</p>
+          <div class="text-6xl font-black text-amber-300 tracking-widest bg-slate-950 px-8 py-3 rounded-2xl border-2 border-amber-400 shadow-2xl inline-block">
             <span id="pinDisplay">----</span>
           </div>
-          <p class="text-[10px] text-slate-400 mt-2">Pautan: ncdjknkedah.github.io/MHfactvsmitosgame/player.html</p>
+          <p class="text-xs text-purple-200 mt-2 font-mono">Imbas QR atau buka: <span class="text-pink-300 font-bold">ncdjknkedah.github.io/MHfactvsmitosgame/player.html</span></p>
         </div>
       </div>
 
-      <!-- PILIHAN TAHAP KESUKARAN (BEGINNER / ADVANCE) -->
-      <div class="my-4 bg-slate-900/60 p-3 rounded-xl border border-teal-500/30">
-        <label class="block text-xs font-bold text-teal-300 mb-2"><i class="fa-solid fa-layer-group"></i> Pilih Tahap Kesukaran Soalan:</label>
-        <div class="flex justify-center gap-3">
-          <button id="btnBeginner" onclick="selectDifficulty('beginner')" class="flex-1 bg-teal-600 border-2 border-teal-300 py-2 rounded-xl text-xs font-bold shadow-md transition">
+      <!-- PILIHAN TAHAP KESUKARAN -->
+      <div class="my-4 bg-purple-950/50 p-3 rounded-2xl border border-purple-400/30">
+        <label class="block text-xs font-black text-amber-300 mb-2 tracking-wide"><i class="fa-solid fa-layer-group"></i> PILIH TAHAP KESUKARAN SOALAN:</label>
+        <div class="flex justify-center gap-4">
+          <button id="btnBeginner" onclick="selectDifficulty('beginner')" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 border-2 border-emerald-300 py-2.5 rounded-xl text-xs font-black shadow-lg transition">
             <i class="fa-solid fa-seedling mr-1"></i> Beginner (15 Soalan Mudah)
           </button>
-          <button id="btnAdvance" onclick="selectDifficulty('advance')" class="flex-1 bg-slate-800 border border-slate-600 py-2 rounded-xl text-xs font-bold text-slate-400 shadow-md transition">
+          <button id="btnAdvance" onclick="selectDifficulty('advance')" class="flex-1 bg-purple-950/80 border border-purple-600 py-2.5 rounded-xl text-xs font-bold text-purple-300 shadow-lg transition">
             <i class="fa-solid fa-fire mr-1"></i> Advance (15 Soalan Sukar)
           </button>
         </div>
@@ -78,55 +90,63 @@
       
       <!-- SENARAI PEMAIN -->
       <div class="mt-2">
-        <h3 class="text-xs font-semibold text-teal-200 mb-2"><i class="fa-solid fa-users"></i> Pemain Berhubung (<span id="playerCount">0</span>/100):</h3>
-        <div id="playerList" class="flex flex-wrap justify-center gap-2 max-h-28 overflow-y-auto p-2"></div>
+        <h3 class="text-xs font-bold text-purple-200 mb-2"><i class="fa-solid fa-users text-pink-400"></i> Pemain Berhubung (<span id="playerCount">0</span>/100):</h3>
+        <div id="playerList" class="flex flex-wrap justify-center gap-2 max-h-24 overflow-y-auto p-2"></div>
       </div>
 
-      <button onclick="startGame()" class="mt-4 bg-gradient-to-r from-teal-500 to-emerald-500 hover:scale-105 text-slate-950 font-black text-lg px-8 py-3 rounded-full shadow-lg transition">
-        Mula Permainan <i class="fa-solid fa-play ml-2"></i>
+      <button onclick="startGame()" class="mt-4 bg-gradient-to-r from-amber-400 via-pink-500 to-purple-600 hover:scale-105 text-slate-950 font-black text-xl px-12 py-4 rounded-full shadow-xl shadow-pink-500/40 transition">
+        MULA PERMAINAN <i class="fa-solid fa-play ml-2"></i>
       </button>
     </div>
 
     <!-- GAME SCREEN -->
     <div id="gameScreen" class="hidden w-full max-w-4xl flex-col items-center">
       <div class="w-full flex justify-between items-center mb-3">
-        <span id="questionNum" class="bg-teal-800/80 px-4 py-1.5 rounded-full text-sm border border-teal-400">Soalan 1</span>
-        <div id="timer" class="text-2xl font-black text-amber-400 bg-slate-900 w-14 h-14 rounded-full flex items-center justify-center border-2 border-amber-400">20</div>
+        <span id="questionNum" class="bg-purple-900/80 px-5 py-2 rounded-full text-sm font-bold border border-purple-400 text-purple-200">Soalan 1</span>
         
-        <button onclick="forceEndGame()" class="bg-rose-600/80 hover:bg-rose-600 border border-rose-400 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1">
+        <!-- Status Jawapan Pemain Masuk -->
+        <div class="bg-purple-950/80 border border-pink-500/40 px-4 py-1.5 rounded-full text-xs font-bold text-pink-300">
+          <i class="fa-solid fa-check-double mr-1"></i> Telah Menjawab: <span id="answeredCount">0</span> / <span id="totalPlayersInGame">0</span>
+        </div>
+
+        <div id="timer" class="text-3xl font-black text-amber-300 bg-slate-950 w-16 h-16 rounded-full flex items-center justify-center border-4 border-amber-400 shadow-xl shadow-amber-400/30">20</div>
+        
+        <button onclick="forceEndGame()" class="bg-rose-600/80 hover:bg-rose-600 border border-rose-400 px-4 py-2 rounded-full text-xs font-extrabold flex items-center gap-1 shadow-md">
           <i class="fa-solid fa-power-off"></i> Tamat Segera
         </button>
       </div>
 
-      <div class="w-full bg-slate-800/80 border border-teal-500/40 p-8 rounded-3xl text-center mb-6 shadow-2xl">
-        <h2 id="questionText" class="text-2xl md:text-3xl font-bold leading-relaxed text-slate-100">Memuatkan...</h2>
+      <!-- Kad Soalan -->
+      <div class="w-full bg-purple-900/50 border-2 border-pink-500/40 p-8 rounded-3xl text-center mb-6 shadow-2xl backdrop-blur-xl">
+        <h2 id="questionText" class="text-2xl md:text-3xl font-extrabold leading-relaxed text-white">Memuatkan...</h2>
       </div>
 
+      <!-- Pilihan Jawapan Visual -->
       <div class="grid grid-cols-2 gap-6 w-full">
-        <div class="bg-rose-600/80 border border-rose-400 p-5 rounded-2xl flex items-center justify-center gap-3 text-2xl font-bold">
-          <i class="fa-solid fa-xmark text-3xl"></i> MITOS
+        <div class="bg-gradient-to-r from-rose-600 to-pink-600 border-2 border-rose-300 p-6 rounded-2xl flex items-center justify-center gap-3 text-3xl font-black shadow-xl shadow-rose-900/50">
+          <i class="fa-solid fa-xmark text-4xl"></i> MITOS
         </div>
-        <div class="bg-sky-600/80 border border-sky-400 p-5 rounded-2xl flex items-center justify-center gap-3 text-2xl font-bold">
-          <i class="fa-solid fa-check text-3xl"></i> FAKTA
+        <div class="bg-gradient-to-r from-cyan-600 to-blue-600 border-2 border-cyan-300 p-6 rounded-2xl flex items-center justify-center gap-3 text-3xl font-black shadow-xl shadow-cyan-900/50">
+          <i class="fa-solid fa-check text-4xl"></i> FAKTA
         </div>
       </div>
     </div>
 
     <!-- RESULT / LEADERBOARD SCREEN -->
-    <div id="resultScreen" class="hidden w-full max-w-2xl text-center bg-slate-800/90 p-6 rounded-3xl border border-teal-500/40">
-      <h2 id="resultTitle" class="text-2xl font-black mb-2"></h2>
-      <p id="explanationText" class="text-sm text-slate-200 bg-slate-900/80 p-3 rounded-xl border border-slate-700 my-3 text-left leading-relaxed"></p>
+    <div id="resultScreen" class="hidden w-full max-w-3xl text-center bg-purple-900/60 p-8 rounded-3xl border border-purple-400/40 backdrop-blur-xl shadow-2xl">
+      <h2 id="resultTitle" class="text-3xl font-black mb-3"></h2>
+      <p id="explanationText" class="text-base text-purple-100 bg-slate-950/80 p-4 rounded-2xl border border-purple-500/30 my-4 text-left leading-relaxed shadow-inner"></p>
       
       <div class="mt-4">
-        <h3 class="text-lg font-bold mb-3 text-teal-300"><i class="fa-solid fa-trophy text-amber-400"></i> Kedudukan Teratas:</h3>
-        <div id="leaderboard" class="space-y-2 max-h-48 overflow-y-auto"></div>
+        <h3 class="text-lg font-black mb-3 text-amber-300 tracking-wide"><i class="fa-solid fa-trophy text-yellow-400 mr-2"></i> PAPAN PENDAHULUAN (TOP 5):</h3>
+        <div id="leaderboard" class="space-y-2 max-h-52 overflow-y-auto"></div>
       </div>
 
       <div class="flex justify-center gap-4 mt-6">
-        <button onclick="nextQuestion()" class="bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold px-6 py-2.5 rounded-full text-md shadow-md">
+        <button onclick="nextQuestion()" class="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black px-8 py-3 rounded-full text-lg shadow-xl shadow-amber-500/30 transition">
           Seterusnya <i class="fa-solid fa-arrow-right ml-1"></i>
         </button>
-        <button onclick="forceEndGame()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-6 py-2.5 rounded-full text-md shadow-md">
+        <button onclick="forceEndGame()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-6 py-3 rounded-full text-md shadow-lg">
           Tamat & Buka Pusingan Baru
         </button>
       </div>
@@ -137,19 +157,19 @@
   <!-- Config Firebase & Script -->
   <script>
     const firebaseConfig = {
-  apiKey: "AIzaSyBNWq38qyVMnJvd2Px3rIU5X-SVWuj3qZo",
-  authDomain: "mhfactvsmitosgame.firebaseapp.com",
-  databaseURL: "https://mhfactvsmitosgame-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "mhfactvsmitosgame",
-  storageBucket: "mhfactvsmitosgame.firebasestorage.app",
-  messagingSenderId: "378342614294",
-  appId: "1:378342614294:web:8c640ffcb7b314769e9c37",
-  measurementId: "G-EDSGHKYHEG"
-};
+      apiKey: "AIzaSyBNWq38qyVMnJvd2Px3rIU5X-SVWuj3qZo",
+      authDomain: "mhfactvsmitosgame.firebaseapp.com",
+      databaseURL: "https://mhfactvsmitosgame-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "mhfactvsmitosgame",
+      storageBucket: "mhfactvsmitosgame.firebasestorage.app",
+      messagingSenderId: "378342614294",
+      appId: "1:378342614294:web:8c640ffcb7b314769e9c37",
+      measurementId: "G-EDSGHKYHEG"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // BANK 50 SOALAN KESIHATAN MENTAL (BEGINNER VS ADVANCE)
+    // BANK 50 SOALAN KESIHATAN MENTAL
     const allQuestions = {
       beginner: [
         { q: "Masalah kesihatan mental adalah tanda kelemahan diri atau kurang iman.", ans: "MITOS", exp: "Masalah kesihatan mental adalah gangguan kesihatan biologikal & psikologi, bukan berpunca daripada kelemahan watak." },
@@ -192,6 +212,7 @@
     let gamePin = Math.floor(100000 + Math.random() * 900000).toString();
     let currentQ = 0;
     let timerInterval;
+    let totalPlayersCount = 0;
 
     document.getElementById('pinDisplay').innerText = gamePin;
 
@@ -203,27 +224,43 @@
       const btnA = document.getElementById('btnAdvance');
       
       if(level === 'beginner') {
-        btnB.className = "flex-1 bg-teal-600 border-2 border-teal-300 py-2 rounded-xl text-xs font-bold shadow-md transition";
-        btnA.className = "flex-1 bg-slate-800 border border-slate-600 py-2 rounded-xl text-xs font-bold text-slate-400 shadow-md transition";
+        btnB.className = "flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 border-2 border-emerald-300 py-2.5 rounded-xl text-xs font-black shadow-lg transition";
+        btnA.className = "flex-1 bg-purple-950/80 border border-purple-600 py-2.5 rounded-xl text-xs font-bold text-purple-300 shadow-lg transition";
       } else {
-        btnA.className = "flex-1 bg-indigo-600 border-2 border-indigo-300 py-2 rounded-xl text-xs font-bold shadow-md transition";
-        btnB.className = "flex-1 bg-slate-800 border border-slate-600 py-2 rounded-xl text-xs font-bold text-slate-400 shadow-md transition";
+        btnA.className = "flex-1 bg-gradient-to-r from-pink-500 to-purple-600 border-2 border-pink-300 py-2.5 rounded-xl text-xs font-black shadow-lg transition";
+        btnB.className = "flex-1 bg-purple-950/80 border border-purple-600 py-2.5 rounded-xl text-xs font-bold text-purple-300 shadow-lg transition";
       }
     }
 
-    // Tetapkan Tetapan Asas dalam Firebase
     db.ref(`games/${gamePin}/settings`).set({ showQuestionOnPhone: true });
 
+    // Monitor Pemain Menyertai Permainan
     db.ref(`games/${gamePin}/players`).on('value', snapshot => {
       const players = snapshot.val() || {};
       const playerList = document.getElementById('playerList');
       playerList.innerHTML = '';
-      let count = 0;
+      totalPlayersCount = Object.keys(players).length;
+      
       for(let id in players) {
-        count++;
-        playerList.innerHTML += `<span class="bg-teal-800/60 border border-teal-400/50 text-teal-100 px-3 py-1 rounded-full text-xs font-semibold">${players[id].name}</span>`;
+        playerList.innerHTML += `<span class="bg-gradient-to-r from-pink-600 to-purple-600 border border-pink-300/40 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">${players[id].name}</span>`;
       }
-      document.getElementById('playerCount').innerText = count;
+      document.getElementById('playerCount').innerText = totalPlayersCount;
+      document.getElementById('totalPlayersInGame').innerText = totalPlayersCount;
+    });
+
+    // Monitor Pemain Menjawab untuk Pemasa Pintar Automatik
+    db.ref(`games/${gamePin}/answers`).on('value', snapshot => {
+      const answers = snapshot.val() || {};
+      const answeredCount = Object.keys(answers).length;
+      document.getElementById('answeredCount').innerText = answeredCount;
+
+      // JIKA SEMUA PEMAIN DAH JAWAB, TAMATKAN MASA SERTA-MERTA (1 SAAT)
+      if(totalPlayersCount > 0 && answeredCount >= totalPlayersCount) {
+        setTimeout(() => {
+          clearInterval(timerInterval);
+          showResult();
+        }, 800);
+      }
     });
 
     function toggleShowQuestion() {
@@ -233,13 +270,21 @@
 
     function toggleAudio() {
       const bg = document.getElementById('bgMusic');
-      bg.paused ? bg.play() : bg.pause();
+      const icon = document.getElementById('audioIcon');
+      if (bg.paused) {
+        bg.play();
+        icon.className = "fa-solid fa-volume-high text-amber-300";
+      } else {
+        bg.pause();
+        icon.className = "fa-solid fa-volume-xmark";
+      }
     }
 
     function startGame() {
-      if(document.getElementById('playerCount').innerText == "0") {
-        alert("Tunggu pemain masuk terlebih dahulu!"); return;
+      if(totalPlayersCount == 0) {
+        alert("Sila tunggu pemain menyertai terlebih dahulu!"); return;
       }
+      toggleAudio(); // Mainkan Muzik secara automatik apabila Mula
       db.ref(`games/${gamePin}/status`).set({ state: 'PLAYING' });
       document.getElementById('lobbyScreen').classList.add('hidden');
       document.getElementById('gameScreen').classList.remove('hidden');
@@ -247,15 +292,18 @@
       loadQuestion();
     }
 
+    let questionStartTime = 0;
     function loadQuestion() {
       let q = questions[currentQ];
       document.getElementById('questionNum').innerText = `Soalan ${currentQ + 1} / ${questions.length}`;
       document.getElementById('questionText').innerText = q.q;
+      questionStartTime = Date.now();
       
+      db.ref(`games/${gamePin}/answers`).remove(); // Clear jawapan lama
       db.ref(`games/${gamePin}/currentQuestion`).set({
         num: currentQ,
         q: q.q,
-        timestamp: Date.now()
+        timestamp: questionStartTime
       });
 
       let timeLeft = 20;
@@ -276,21 +324,31 @@
       document.getElementById('resultScreen').classList.remove('hidden');
       
       let q = questions[currentQ];
-      document.getElementById('resultTitle').innerHTML = `Jawapan Sebenar: <span class="${q.ans === 'FAKTA' ? 'text-sky-400' : 'text-rose-400'}">${q.ans}</span>`;
+      document.getElementById('resultTitle').innerHTML = `Jawapan Sebenar: <span class="${q.ans === 'FAKTA' ? 'text-cyan-300' : 'text-pink-400'}">${q.ans}</span>`;
       document.getElementById('explanationText').innerText = q.exp;
 
-      // Kira Skor Jawapan Pemain
+      // KIRA SKOR BERDASARKAN KELAJUAN JAWAPAN
       db.ref(`games/${gamePin}/answers`).once('value', snapshot => {
         let answers = snapshot.val() || {};
         for(let pid in answers) {
-          if(answers[pid].answer === q.ans) {
-            db.ref(`games/${gamePin}/players/${pid}/score`).transaction(s => (s || 0) + 100);
+          let userAns = answers[pid];
+          if(userAns.answer === q.ans) {
+            // Formula skor kelajuan (Maksima 1000, minima 500)
+            let timeTaken = (userAns.timestamp - questionStartTime) / 1000;
+            let speedBonus = Math.max(500, Math.floor(1000 - (timeTaken * 25)));
+            
+            db.ref(`games/${gamePin}/players/${pid}/score`).transaction(s => (s || 0) + speedBonus);
+            db.ref(`games/${gamePin}/players/${pid}/lastResult`).set({ correct: true, ans: q.ans });
+          } else {
+            db.ref(`games/${gamePin}/players/${pid}/lastResult`).set({ correct: false, ans: q.ans });
           }
         }
-        db.ref(`games/${gamePin}/answers`).remove();
       });
 
-      setTimeout(updateLeaderboard, 500);
+      // Kemaskini Status Ke Skrin Pemain
+      db.ref(`games/${gamePin}/currentQuestion`).set({ state: 'SHOW_RESULT', correctAns: q.ans });
+
+      setTimeout(updateLeaderboard, 600);
     }
 
     function updateLeaderboard() {
@@ -299,7 +357,8 @@
         let sorted = Object.values(players).sort((a,b) => (b.score || 0) - (a.score || 0));
         let lbHtml = '';
         sorted.slice(0, 5).forEach((p, index) => {
-          lbHtml += `<div class="flex justify-between items-center bg-slate-700/50 p-2.5 rounded-xl text-sm"><span class="font-bold">${index + 1}. ${p.name}</span><span class="text-teal-300 font-extrabold">${p.score || 0} pts</span></div>`;
+          let rankBadge = index === 0 ? '🥇' : (index === 1 ? '🥈' : (index === 2 ? '🥉' : `${index + 1}.`));
+          lbHtml += `<div class="flex justify-between items-center bg-slate-950/80 p-3 rounded-2xl border border-purple-500/30 text-sm font-bold"><span class="text-white">${rankBadge} ${p.name}</span><span class="text-amber-300 text-base">${p.score || 0} pts</span></div>`;
         });
         document.getElementById('leaderboard').innerHTML = lbHtml;
       });
@@ -328,7 +387,7 @@
         });
 
         db.ref(`games/${gamePin}/status`).set({ state: 'ENDED', winners: winners });
-        alert("Permainan Telah Ditamatkan! Skrin pemenang kini dipaparkan di peranti pemain.");
+        alert("Permainan Telah Ditamatkan! Kad pemenang kini dipaparkan di telefon pemain.");
         location.reload();
       });
     }
