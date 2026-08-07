@@ -30,28 +30,46 @@
   </audio>
 
   <!-- Header -->
-  <header class="flex justify-between items-center border-b border-purple-500/30 pb-4 backdrop-blur-md">
+  <header class="flex flex-col lg:flex-row justify-between items-center border-b border-purple-500/30 pb-4 backdrop-blur-md gap-4">
     <div class="flex items-center gap-4">
       <div class="bg-gradient-to-tr from-pink-500 to-amber-400 p-3 rounded-2xl shadow-lg shadow-pink-500/30 animate-glow">
         <i class="fa-solid fa-brain text-3xl text-white"></i>
       </div>
       <div>
-        <h1 class="text-3xl font-black tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-amber-300 via-pink-300 to-cyan-300">
+        <h1 class="text-2xl md:text-3xl font-black tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-amber-300 via-pink-300 to-cyan-300">
           Mitos & Fakta Kesihatan Mental
         </h1>
         <p class="text-xs text-purple-200 font-medium">Cabar Minda, Hapuskan Stigma! • Interactive Quiz</p>
       </div>
     </div>
     
-    <div class="flex items-center gap-3">
-      <label class="flex items-center cursor-pointer bg-purple-900/60 px-4 py-2 rounded-full border border-purple-400/40 text-xs gap-2 shadow-inner">
-        <span class="font-bold text-purple-200">Papar Soalan di Phone:</span>
+    <!-- KAWALAN AUDIO & VOLUME MIXER -->
+    <div class="flex flex-wrap items-center gap-3 bg-purple-950/70 p-3 rounded-2xl border border-purple-400/30 shadow-inner">
+      
+      <!-- Volume Muzik Latar -->
+      <div class="flex items-center gap-2 bg-purple-900/60 px-3 py-1.5 rounded-xl border border-purple-400/30 text-xs">
+        <i class="fa-solid fa-music text-pink-400"></i>
+        <span class="font-bold text-purple-200 hidden sm:inline">Muzik:</span>
+        <input type="range" id="bgVol" min="0" max="1" step="0.05" value="0.3" onchange="adjustVolume()" class="w-16 accent-pink-400 cursor-pointer">
+      </div>
+
+      <!-- Volume Kesan Khas (SFX) -->
+      <div class="flex items-center gap-2 bg-purple-900/60 px-3 py-1.5 rounded-xl border border-purple-400/30 text-xs">
+        <i class="fa-solid fa-bell text-amber-300"></i>
+        <span class="font-bold text-purple-200 hidden sm:inline">SFX:</span>
+        <input type="range" id="sfxVol" min="0" max="1" step="0.1" value="1" class="w-16 accent-amber-300 cursor-pointer">
+      </div>
+
+      <!-- Toggle Show Question -->
+      <label class="flex items-center cursor-pointer bg-purple-900/60 px-3 py-1.5 rounded-xl border border-purple-400/30 text-xs gap-2">
+        <span class="font-bold text-purple-200 hidden sm:inline">Soalan di Phone:</span>
         <input type="checkbox" id="showQToggle" onchange="toggleShowQuestion()" class="sr-only peer" checked>
-        <div class="w-9 h-5 bg-purple-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-400 relative"></div>
+        <div class="w-8 h-4 bg-purple-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-amber-400 relative"></div>
       </label>
 
-      <button onclick="toggleAudio()" class="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 border border-pink-300/50 px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 shadow-lg transition">
-        <i id="audioIcon" class="fa-solid fa-volume-xmark"></i> <span id="audioText">Muzik Latar</span>
+      <!-- Butang Play/Pause Muzik -->
+      <button onclick="toggleAudio()" class="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 border border-pink-300/50 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg transition">
+        <i id="audioIcon" class="fa-solid fa-volume-xmark"></i> <span id="audioText">Muzik</span>
       </button>
     </div>
   </header>
@@ -223,7 +241,7 @@
     const db = firebase.database();
 
     // ----------------------------------------------------
-    // WEB AUDIO API SYSTEM
+    // WEB AUDIO API SYSTEM (DENGAN KAWALAN SFX VOLUME)
     // ----------------------------------------------------
     let audioCtx = null;
     function getAudioContext() {
@@ -236,14 +254,30 @@
       return audioCtx;
     }
 
+    function getSfxVolume() {
+      const slider = document.getElementById('sfxVol');
+      return parseFloat(slider ? slider.value : 1.0);
+    }
+
+    function adjustVolume() {
+      const bg = document.getElementById('bgMusic');
+      const bgVolSlider = document.getElementById('bgVol');
+      if (bg && bgVolSlider) {
+        bg.volume = parseFloat(bgVolSlider.value);
+      }
+    }
+
     function playTickSound() {
       try {
+        let sfxMult = getSfxVolume();
+        if(sfxMult <= 0) return;
+
         let ctx = getAudioContext();
         let osc = ctx.createOscillator();
         let gain = ctx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(800, ctx.currentTime);
-        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.setValueAtTime(0.08 * sfxMult, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
         osc.connect(gain);
         gain.connect(ctx.destination);
@@ -254,6 +288,9 @@
 
     function playChimeSound() {
       try {
+        let sfxMult = getSfxVolume();
+        if(sfxMult <= 0) return;
+
         let ctx = getAudioContext();
         let notes = [523.25, 659.25, 783.99, 1046.50];
         notes.forEach((freq, idx) => {
@@ -261,7 +298,7 @@
           let gain = ctx.createGain();
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(freq, ctx.currentTime + (idx * 0.08));
-          gain.gain.setValueAtTime(0.1, ctx.currentTime + (idx * 0.08));
+          gain.gain.setValueAtTime(0.15 * sfxMult, ctx.currentTime + (idx * 0.08));
           gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (idx * 0.08) + 0.3);
           osc.connect(gain);
           gain.connect(ctx.destination);
@@ -273,6 +310,9 @@
 
     function playDrumRoll(durationMs = 3000) {
       try {
+        let sfxMult = getSfxVolume();
+        if(sfxMult <= 0) return;
+
         let ctx = getAudioContext();
         let startTime = ctx.currentTime;
         let endTime = startTime + (durationMs / 1000);
@@ -294,7 +334,7 @@
 
           let gain = ctx.createGain();
           let progress = (t - startTime) / (endTime - startTime);
-          gain.gain.setValueAtTime(0.02 + (progress * 0.2), t);
+          gain.gain.setValueAtTime((0.02 + (progress * 0.25)) * sfxMult, t);
           gain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
 
           whiteNoise.connect(filter);
@@ -309,6 +349,9 @@
 
     function playCymbalCrash() {
       try {
+        let sfxMult = getSfxVolume();
+        if(sfxMult <= 0) return;
+
         let ctx = getAudioContext();
         let bufferSize = ctx.sampleRate * 1.5;
         let buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
@@ -325,7 +368,7 @@
         filter.frequency.value = 4000;
 
         let gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.setValueAtTime(0.4 * sfxMult, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
 
         cymbal.connect(filter);
@@ -436,9 +479,9 @@
       db.ref(`games/${gamePin}/settings/showQuestionOnPhone`).set(isChecked);
     }
 
-    // FUNGSI MUZIK DENGAN SMART FALLBACK
     function toggleAudio() {
       getAudioContext();
+      adjustVolume();
       const bg = document.getElementById('bgMusic');
       const icon = document.getElementById('audioIcon');
       const audioText = document.getElementById('audioText');
@@ -448,20 +491,18 @@
         if (playPromise !== undefined) {
           playPromise.then(() => {
             icon.className = "fa-solid fa-volume-high text-amber-300";
-            audioText.innerText = "Muzik Dimainkan";
+            audioText.innerText = "Dimainkan";
           }).catch(error => {
-            console.log("Audio Local Fail, switching to CDN...", error);
-            // Jika bgm.mp3 gagal dipanggil, guna link CDN simpanan
             bg.src = "https://codeskulptor-demos.commondatastorage.googleapis.com/descent/background%20music.mp3";
             bg.play();
             icon.className = "fa-solid fa-volume-high text-amber-300";
-            audioText.innerText = "Muzik Dimainkan";
+            audioText.innerText = "Dimainkan";
           });
         }
       } else {
         bg.pause();
         icon.className = "fa-solid fa-volume-xmark";
-        audioText.innerText = "Muzik Latar";
+        audioText.innerText = "Muzik";
       }
     }
 
@@ -470,6 +511,7 @@
         alert("Sila tunggu pemain menyertai terlebih dahulu!"); return;
       }
       getAudioContext();
+      adjustVolume();
       const bg = document.getElementById('bgMusic');
       if (bg.paused) {
         toggleAudio();
