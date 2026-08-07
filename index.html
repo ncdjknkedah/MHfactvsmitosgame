@@ -23,7 +23,7 @@
 </head>
 <body class="bg-gradient-to-br from-indigo-950 via-purple-900 to-fuchsia-950 min-h-screen text-white font-sans flex flex-col justify-between p-6 overflow-x-hidden">
 
-  <!-- Audio Elements (Boleh ditukar kepada src="bgm.mp3" jika muat naik fail mp3 sendiri) -->
+  <!-- Audio Elements (Membaca fail bgm.mp3 di GitHub anda) -->
   <audio id="bgMusic" loop preload="auto" src="bgm.mp3"></audio>
 
   <!-- Header -->
@@ -48,7 +48,7 @@
       </label>
 
       <button onclick="toggleAudio()" class="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 border border-pink-300/50 px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 shadow-lg transition">
-        <i id="audioIcon" class="fa-solid fa-volume-xmark"></i> Muzik Latar
+        <i id="audioIcon" class="fa-solid fa-volume-xmark"></i> <span id="audioText">Muzik Latar</span>
       </button>
     </div>
   </header>
@@ -137,7 +137,7 @@
       <p id="explanationText" class="text-base text-purple-100 bg-slate-950/80 p-4 rounded-2xl border border-purple-500/30 my-4 text-left leading-relaxed shadow-inner"></p>
       
       <div class="mt-4">
-        <h3 class="text-lg font-black mb-3 text-amber-300 tracking-wide"><i class="fa-solid fa-trophy text-yellow-400 mr-2"></i> KEDUKAN SEMASA:</h3>
+        <h3 class="text-lg font-black mb-3 text-amber-300 tracking-wide"><i class="fa-solid fa-trophy text-yellow-400 mr-2"></i> KEDUDUKAN SEMASA:</h3>
         <div id="leaderboard" class="space-y-2 max-h-52 overflow-y-auto"></div>
       </div>
 
@@ -212,6 +212,60 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // ----------------------------------------------------
+    // WEB AUDIO API SYSTEM (BUNYI DETIK & CHIME REKAAN PANTAS)
+    // ----------------------------------------------------
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // Bunyi Detik (Tick) Pemasa
+    function playTickSound() {
+      try {
+        let ctx = getAudioContext();
+        let osc = ctx.createOscillator();
+        let gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, ctx.currentTime);
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.08);
+      } catch(e){}
+    }
+
+    // Bunyi Chime Bila Masa Tamat / Keputusan
+    function playChimeSound() {
+      try {
+        let ctx = getAudioContext();
+        let notes = [523.25, 659.25, 783.99, 1046.50]; // Chord C Major
+        notes.forEach((freq, idx) => {
+          let osc = ctx.createOscillator();
+          let gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + (idx * 0.08));
+          gain.gain.setValueAtTime(0.1, ctx.currentTime + (idx * 0.08));
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (idx * 0.08) + 0.3);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + (idx * 0.08));
+          osc.stop(ctx.currentTime + (idx * 0.08) + 0.3);
+        });
+      } catch(e){}
+    }
+
+    // ----------------------------------------------------
+    // BANK SOALAN
+    // ----------------------------------------------------
     const allQuestions = {
       beginner: [
         { q: "Masalah kesihatan mental adalah tanda kelemahan diri atau kurang iman.", ans: "MITOS", exp: "Masalah kesihatan mental adalah gangguan kesihatan biologikal & psikologi, bukan berpunca daripada kelemahan watak." },
@@ -308,14 +362,23 @@
     }
 
     function toggleAudio() {
+      getAudioContext(); // Aktifkan Audio Context
       const bg = document.getElementById('bgMusic');
       const icon = document.getElementById('audioIcon');
+      const audioText = document.getElementById('audioText');
+
       if (bg.paused) {
-        bg.play().catch(e => console.log(e));
-        icon.className = "fa-solid fa-volume-high text-amber-300";
+        bg.play().then(() => {
+          icon.className = "fa-solid fa-volume-high text-amber-300";
+          audioText.innerText = "Muzik dimainkan";
+        }).catch(e => {
+          console.log(e);
+          alert("Klik skrin sekali lagi untuk benarkan muzik!");
+        });
       } else {
         bg.pause();
         icon.className = "fa-solid fa-volume-xmark";
+        audioText.innerText = "Muzik Latar";
       }
     }
 
@@ -323,7 +386,12 @@
       if(totalPlayersCount == 0) {
         alert("Sila tunggu pemain menyertai terlebih dahulu!"); return;
       }
-      toggleAudio();
+      getAudioContext();
+      const bg = document.getElementById('bgMusic');
+      if (bg.paused) {
+        toggleAudio();
+      }
+
       db.ref(`games/${gamePin}/status`).set({ state: 'PLAYING' });
       document.getElementById('lobbyScreen').classList.add('hidden');
       document.getElementById('gameScreen').classList.remove('hidden');
@@ -348,9 +416,16 @@
       let timeLeft = 20;
       document.getElementById('timer').innerText = timeLeft;
       clearInterval(timerInterval);
+      
       timerInterval = setInterval(() => {
         timeLeft--;
         document.getElementById('timer').innerText = timeLeft;
+        
+        // Bunyi Detik Pemasa
+        if(timeLeft > 0) {
+          playTickSound();
+        }
+
         if(timeLeft <= 0) {
           clearInterval(timerInterval);
           showResult();
@@ -359,6 +434,9 @@
     }
 
     function showResult() {
+      // Mainkan Bunyi Chime
+      playChimeSound();
+
       document.getElementById('gameScreen').classList.add('hidden');
       document.getElementById('resultScreen').classList.remove('hidden');
       
@@ -411,7 +489,6 @@
       }
     }
 
-    // FUNGSI KONFETI POPPER DARI KIRI DAN KANAN
     function triggerConfettiPopper() {
       var count = 200;
       var defaults = { origin: { y: 0.7 } };
@@ -431,6 +508,8 @@
 
     function forceEndGame() {
       clearInterval(timerInterval);
+      playChimeSound(); // Chime penutup
+
       db.ref(`games/${gamePin}/players`).once('value', snapshot => {
         let players = snapshot.val() || {};
         let sorted = Object.entries(players).sort((a,b) => (b[1].score || 0) - (a[1].score || 0));
@@ -442,13 +521,11 @@
 
         db.ref(`games/${gamePin}/status`).set({ state: 'ENDED', winners: winners });
 
-        // TAMPILKAN PODIUM SKRIN AKHIR
         document.getElementById('gameScreen').classList.add('hidden');
         document.getElementById('resultScreen').classList.add('hidden');
         document.getElementById('lobbyScreen').classList.add('hidden');
         document.getElementById('podiumScreen').classList.remove('hidden');
 
-        // Isi data Top 3 ke Podium
         if(sorted[0]) {
           document.getElementById('p1Name').innerText = sorted[0][1].name;
           document.getElementById('p1Score').innerText = `${sorted[0][1].score || 0} pts`;
@@ -462,14 +539,12 @@
           document.getElementById('p3Score').innerText = `${sorted[2][1].score || 0} pts`;
         }
 
-        // Isi Peserta Kedudukan Ke-4 dan seterusnya
         let otherHtml = '';
         sorted.slice(3).forEach(([id, data], idx) => {
           otherHtml += `<span class="bg-purple-900/60 border border-purple-500/30 text-purple-200 px-3 py-1 rounded-full text-xs font-semibold">#${idx + 4} ${data.name} (${data.score || 0} pts)</span>`;
         });
         document.getElementById('otherPlayersList').innerHTML = otherHtml || '<span class="text-xs text-purple-400">Tiada peserta lain</span>';
 
-        // LANCARKAN KONFETI
         triggerConfettiPopper();
       });
     }
