@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kesihatan Mental Quiz - Skrin Hos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body class="bg-gradient-to-br from-teal-950 via-slate-900 to-indigo-950 min-h-screen text-white font-sans flex flex-col justify-between p-6">
+
+  <!-- Audio Controls -->
+  <audio id="bgMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-game-level-music-689.mp3"></audio>
+
+  <!-- Header -->
+  <header class="flex justify-between items-center border-b border-teal-500/30 pb-4">
+    <div class="flex items-center gap-3">
+      <i class="fa-solid fa-brain text-4xl text-teal-400 animate-pulse"></i>
+      <div>
+        <h1 class="text-2xl font-bold">Mitos & Fakta Kesihatan Mental</h1>
+        <p class="text-xs text-teal-200">Setiap fikiran positif adalah langkah menuju jiwa sejahtera!</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-3">
+      <!-- Toggle Papar Soalan di Phone Pemain -->
+      <label class="flex items-center cursor-pointer bg-slate-800/80 px-4 py-2 rounded-full border border-teal-500/30 text-xs gap-2">
+        <span>Papar Soalan di Phone:</span>
+        <input type="checkbox" id="showQToggle" onchange="toggleShowQuestion()" class="sr-only peer" checked>
+        <div class="w-9 h-5 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500 relative"></div>
+      </label>
+
+      <button onclick="toggleAudio()" class="bg-teal-800/50 hover:bg-teal-700 border border-teal-400 px-3 py-2 rounded-full text-xs flex items-center gap-1">
+        <i id="audioIcon" class="fa-solid fa-volume-xmark"></i> Muzik
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 flex flex-col justify-center items-center my-4">
+
+    <!-- LOBBY SCREEN -->
+    <div id="lobbyScreen" class="text-center w-full max-w-2xl bg-slate-800/60 p-8 rounded-3xl border border-teal-500/30 backdrop-blur-md shadow-2xl">
+      <i class="fa-solid fa-heart-pulse text-6xl text-teal-400 mb-2 animate-bounce"></i>
+      <h2 class="text-lg text-slate-300">Imbas QR / Layari Laman Web & Masukkan PIN:</h2>
+      <div class="text-6xl font-black text-teal-300 bg-slate-900/90 py-4 px-8 rounded-2xl border border-teal-500 inline-block my-3 shadow-inner tracking-widest">
+        <span id="pinDisplay">----</span>
+      </div>
+      
+      <div class="mt-4">
+        <h3 class="text-md font-semibold text-teal-200 mb-2"><i class="fa-solid fa-users"></i> Pemain Berhubung (<span id="playerCount">0</span>/100):</h3>
+        <div id="playerList" class="flex flex-wrap justify-center gap-2 max-h-36 overflow-y-auto p-2"></div>
+      </div>
+
+      <button onclick="startGame()" class="mt-6 bg-gradient-to-r from-teal-500 to-emerald-500 hover:scale-105 text-slate-950 font-black text-xl px-10 py-3.5 rounded-full shadow-lg transition">
+        Mula Permainan <i class="fa-solid fa-play ml-2"></i>
+      </button>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="gameScreen" class="hidden w-full max-w-4xl flex-col items-center">
+      <div class="w-full flex justify-between items-center mb-3">
+        <span id="questionNum" class="bg-teal-800/80 px-4 py-1.5 rounded-full text-sm border border-teal-400">Soalan 1</span>
+        <div id="timer" class="text-2xl font-black text-amber-400 bg-slate-900 w-14 h-14 rounded-full flex items-center justify-center border-2 border-amber-400">20</div>
+        
+        <!-- Butang Tamatkan Game Segera -->
+        <button onclick="forceEndGame()" class="bg-rose-600/80 hover:bg-rose-600 border border-rose-400 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1">
+          <i class="fa-solid fa-power-off"></i> Tamat Segera
+        </button>
+      </div>
+
+      <div class="w-full bg-slate-800/80 border border-teal-500/40 p-8 rounded-3xl text-center mb-6 shadow-2xl">
+        <h2 id="questionText" class="text-2xl md:text-3xl font-bold leading-relaxed text-slate-100">Memuatkan...</h2>
+      </div>
+
+      <div class="grid grid-cols-2 gap-6 w-full">
+        <div class="bg-rose-600/80 border border-rose-400 p-5 rounded-2xl flex items-center justify-center gap-3 text-2xl font-bold">
+          <i class="fa-solid fa-xmark text-3xl"></i> MITOS
+        </div>
+        <div class="bg-sky-600/80 border border-sky-400 p-5 rounded-2xl flex items-center justify-center gap-3 text-2xl font-bold">
+          <i class="fa-solid fa-check text-3xl"></i> FAKTA
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULT / LEADERBOARD SCREEN -->
+    <div id="resultScreen" class="hidden w-full max-w-2xl text-center bg-slate-800/90 p-6 rounded-3xl border border-teal-500/40">
+      <h2 id="resultTitle" class="text-2xl font-black mb-2"></h2>
+      <p id="explanationText" class="text-sm text-slate-200 bg-slate-900/80 p-3 rounded-xl border border-slate-700 my-3 text-left leading-relaxed"></p>
+      
+      <div class="mt-4">
+        <h3 class="text-lg font-bold mb-3 text-teal-300"><i class="fa-solid fa-trophy text-amber-400"></i> Kedudukan Teratas:</h3>
+        <div id="leaderboard" class="space-y-2 max-h-48 overflow-y-auto"></div>
+      </div>
+
+      <div class="flex justify-center gap-4 mt-6">
+        <button onclick="nextQuestion()" class="bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold px-6 py-2.5 rounded-full text-md shadow-md">
+          Seterusnya <i class="fa-solid fa-arrow-right ml-1"></i>
+        </button>
+        <button onclick="forceEndGame()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-6 py-2.5 rounded-full text-md shadow-md">
+          Tamat & Buka Pusingan Baru
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Config Firebase & Script -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+      projectId: "YOUR_PROJECT"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let gamePin = Math.floor(100000 + Math.random() * 900000).toString();
+    let questions = [
+      { q: "Masalah kesihatan mental adalah tanda kelemahan diri atau kurang iman.", ans: "MITOS", exp: "Masalah kesihatan mental adalah gangguan kesihatan biologikal & psikologi, bukan berpunca daripada kelemahan watak." },
+      { q: "Orang yang ada masalah kesihatan mental boleh pulih dan menjalani kehidupan produktif.", ans: "FAKTA", exp: "Dengan rawatan, terapi, dan sokongan yang betul, ramai individu pulih sepenuhnya." },
+      { q: "Tidur yang tidak mencukupi secara berterusan boleh menjejaskan kesihatan mental.", ans: "FAKTA", exp: "Gangguan tidur berkait rapat dengan peningkatan risiko kemurungan dan keresahan." }
+    ];
+    let currentQ = 0;
+    let timerInterval;
+
+    document.getElementById('pinDisplay').innerText = gamePin;
+
+    // Tetapkan Tetapan Asas
+    db.ref(`games/${gamePin}/settings`).set({ showQuestionOnPhone: true });
+
+    db.ref(`games/${gamePin}/players`).on('value', snapshot => {
+      const players = snapshot.val() || {};
+      const playerList = document.getElementById('playerList');
+      playerList.innerHTML = '';
+      let count = 0;
+      for(let id in players) {
+        count++;
+        playerList.innerHTML += `<span class="bg-teal-800/60 border border-teal-400/50 text-teal-100 px-3 py-1 rounded-full text-xs font-semibold">${players[id].name}</span>`;
+      }
+      document.getElementById('playerCount').innerText = count;
+    });
+
+    function toggleShowQuestion() {
+      const isChecked = document.getElementById('showQToggle').checked;
+      db.ref(`games/${gamePin}/settings/showQuestionOnPhone`).set(isChecked);
+    }
+
+    function toggleAudio() {
+      const bg = document.getElementById('bgMusic');
+      bg.paused ? bg.play() : bg.pause();
+    }
+
+    function startGame() {
+      if(document.getElementById('playerCount').innerText == "0") {
+        alert("Tunggu pemain masuk terlebih dahulu!"); return;
+      }
+      db.ref(`games/${gamePin}/status`).set({ state: 'PLAYING' });
+      document.getElementById('lobbyScreen').classList.add('hidden');
+      document.getElementById('gameScreen').classList.remove('hidden');
+      document.getElementById('gameScreen').classList.add('flex');
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      let q = questions[currentQ];
+      document.getElementById('questionNum').innerText = `Soalan ${currentQ + 1} / ${questions.length}`;
+      document.getElementById('questionText').innerText = q.q;
+      
+      db.ref(`games/${gamePin}/currentQuestion`).set({
+        num: currentQ,
+        q: q.q,
+        timestamp: Date.now()
+      });
+
+      let timeLeft = 20;
+      document.getElementById('timer').innerText = timeLeft;
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').innerText = timeLeft;
+        if(timeLeft <= 0) {
+          clearInterval(timerInterval);
+          showResult();
+        }
+      }, 1000);
+    }
+
+    function showResult() {
+      document.getElementById('gameScreen').classList.add('hidden');
+      document.getElementById('resultScreen').classList.remove('hidden');
+      
+      let q = questions[currentQ];
+      document.getElementById('resultTitle').innerHTML = `Jawapan Sebenar: <span class="${q.ans === 'FAKTA' ? 'text-sky-400' : 'text-rose-400'}">${q.ans}</span>`;
+      document.getElementById('explanationText').innerText = q.exp;
+
+      // Kira Skor Jawapan Pemain
+      db.ref(`games/${gamePin}/answers`).once('value', snapshot => {
+        let answers = snapshot.val() || {};
+        for(let pid in answers) {
+          if(answers[pid].answer === q.ans) {
+            db.ref(`games/${gamePin}/players/${pid}/score`).transaction(s => (s || 0) + 100);
+          }
+        }
+        // Padam jawapan fasa lepas
+        db.ref(`games/${gamePin}/answers`).remove();
+      });
+
+      // Panggil Leaderboard
+      setTimeout(updateLeaderboard, 500);
+    }
+
+    function updateLeaderboard() {
+      db.ref(`games/${gamePin}/players`).once('value', snapshot => {
+        let players = snapshot.val() || {};
+        let sorted = Object.values(players).sort((a,b) => (b.score || 0) - (a.score || 0));
+        let lbHtml = '';
+        sorted.slice(0, 5).forEach((p, index) => {
+          lbHtml += `<div class="flex justify-between items-center bg-slate-700/50 p-2.5 rounded-xl text-sm"><span class="font-bold">${index + 1}. ${p.name}</span><span class="text-teal-300 font-extrabold">${p.score || 0} pts</span></div>`;
+        });
+        document.getElementById('leaderboard').innerHTML = lbHtml;
+      });
+    }
+
+    function nextQuestion() {
+      currentQ++;
+      if(currentQ < questions.length) {
+        document.getElementById('resultScreen').classList.add('hidden');
+        document.getElementById('gameScreen').classList.remove('hidden');
+        loadQuestion();
+      } else {
+        forceEndGame();
+      }
+    }
+
+    // Tentukan Tamat Permainan & Hantar Sijil Pemenang
+    function forceEndGame() {
+      clearInterval(timerInterval);
+      db.ref(`games/${gamePin}/players`).once('value', snapshot => {
+        let players = snapshot.val() || {};
+        let sorted = Object.entries(players).sort((a,b) => (b[1].score || 0) - (a[1].score || 0));
+        
+        let winners = {};
+        sorted.forEach(([id, data], index) => {
+          winners[id] = { rank: index + 1, name: data.name, score: data.score || 0 };
+        });
+
+        // Hantar Isyarat Game Ended ke semua skrin pemain
+        db.ref(`games/${gamePin}/status`).set({ state: 'ENDED', winners: winners });
+        alert("Permainan Telah Ditamatkan! Skrin pemenang kini dipaparkan di peranti pemain.");
+        location.reload(); // Reset hos untuk pusingan baru
+      });
+    }
+  </script>
+</body>
+</html>
