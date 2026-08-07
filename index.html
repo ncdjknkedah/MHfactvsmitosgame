@@ -42,19 +42,47 @@
   <main class="flex-1 flex flex-col justify-center items-center my-4">
 
     <!-- LOBBY SCREEN -->
-    <div id="lobbyScreen" class="text-center w-full max-w-2xl bg-slate-800/60 p-8 rounded-3xl border border-teal-500/30 backdrop-blur-md shadow-2xl">
-      <i class="fa-solid fa-heart-pulse text-6xl text-teal-400 mb-2 animate-bounce"></i>
-      <h2 class="text-lg text-slate-300">Imbas QR / Layari Laman Web & Masukkan PIN:</h2>
-      <div class="text-6xl font-black text-teal-300 bg-slate-900/90 py-4 px-8 rounded-2xl border border-teal-500 inline-block my-3 shadow-inner tracking-widest">
-        <span id="pinDisplay">----</span>
-      </div>
+    <div id="lobbyScreen" class="text-center w-full max-w-2xl bg-slate-800/60 p-6 rounded-3xl border border-teal-500/30 backdrop-blur-md shadow-2xl">
+      <i class="fa-solid fa-heart-pulse text-5xl text-teal-400 mb-2 animate-bounce"></i>
+      <h2 class="text-md text-slate-300">Imbas QR / Layari Laman Web & Masukkan PIN:</h2>
       
-      <div class="mt-4">
-        <h3 class="text-md font-semibold text-teal-200 mb-2"><i class="fa-solid fa-users"></i> Pemain Berhubung (<span id="playerCount">0</span>/100):</h3>
-        <div id="playerList" class="flex flex-wrap justify-center gap-2 max-h-36 overflow-y-auto p-2"></div>
+      <!-- PAPARAN QR CODE & PIN -->
+      <div class="flex flex-col md:flex-row items-center justify-center gap-6 my-4 bg-slate-900/80 p-4 rounded-2xl border border-teal-500/50">
+        <!-- QR Code -->
+        <div class="bg-white p-2 rounded-xl shadow-lg">
+          <img src="https://quickchart.io/qr?text=https://ncdjknkedah.github.io/MHfactvsmitosgame/player.html&size=140&dark=0d9488" alt="QR Code Pemain" class="w-32 h-32 rounded-lg">
+        </div>
+        
+        <!-- Game PIN Display -->
+        <div class="text-center">
+          <p class="text-xs text-teal-300 font-semibold mb-1">KOD PERMAINAN (GAME PIN):</p>
+          <div class="text-5xl font-black text-teal-300 tracking-widest bg-slate-950 px-6 py-3 rounded-xl border border-teal-500/50 shadow-inner">
+            <span id="pinDisplay">----</span>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-2">Pautan: ncdjknkedah.github.io/MHfactvsmitosgame/player.html</p>
+        </div>
       </div>
 
-      <button onclick="startGame()" class="mt-6 bg-gradient-to-r from-teal-500 to-emerald-500 hover:scale-105 text-slate-950 font-black text-xl px-10 py-3.5 rounded-full shadow-lg transition">
+      <!-- PILIHAN TAHAP KESUKARAN (BEGINNER / ADVANCE) -->
+      <div class="my-4 bg-slate-900/60 p-3 rounded-xl border border-teal-500/30">
+        <label class="block text-xs font-bold text-teal-300 mb-2"><i class="fa-solid fa-layer-group"></i> Pilih Tahap Kesukaran Soalan:</label>
+        <div class="flex justify-center gap-3">
+          <button id="btnBeginner" onclick="selectDifficulty('beginner')" class="flex-1 bg-teal-600 border-2 border-teal-300 py-2 rounded-xl text-xs font-bold shadow-md transition">
+            <i class="fa-solid fa-seedling mr-1"></i> Beginner (15 Soalan Mudah)
+          </button>
+          <button id="btnAdvance" onclick="selectDifficulty('advance')" class="flex-1 bg-slate-800 border border-slate-600 py-2 rounded-xl text-xs font-bold text-slate-400 shadow-md transition">
+            <i class="fa-solid fa-fire mr-1"></i> Advance (15 Soalan Sukar)
+          </button>
+        </div>
+      </div>
+      
+      <!-- SENARAI PEMAIN -->
+      <div class="mt-2">
+        <h3 class="text-xs font-semibold text-teal-200 mb-2"><i class="fa-solid fa-users"></i> Pemain Berhubung (<span id="playerCount">0</span>/100):</h3>
+        <div id="playerList" class="flex flex-wrap justify-center gap-2 max-h-28 overflow-y-auto p-2"></div>
+      </div>
+
+      <button onclick="startGame()" class="mt-4 bg-gradient-to-r from-teal-500 to-emerald-500 hover:scale-105 text-slate-950 font-black text-lg px-8 py-3 rounded-full shadow-lg transition">
         Mula Permainan <i class="fa-solid fa-play ml-2"></i>
       </button>
     </div>
@@ -65,7 +93,6 @@
         <span id="questionNum" class="bg-teal-800/80 px-4 py-1.5 rounded-full text-sm border border-teal-400">Soalan 1</span>
         <div id="timer" class="text-2xl font-black text-amber-400 bg-slate-900 w-14 h-14 rounded-full flex items-center justify-center border-2 border-amber-400">20</div>
         
-        <!-- Butang Tamatkan Game Segera -->
         <button onclick="forceEndGame()" class="bg-rose-600/80 hover:bg-rose-600 border border-rose-400 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1">
           <i class="fa-solid fa-power-off"></i> Tamat Segera
         </button>
@@ -109,31 +136,82 @@
 
   <!-- Config Firebase & Script -->
   <script>
-   const firebaseConfig = {
-  apiKey: "AIzaSyBNWq38qyVMnJvd2Px3rIU5X-SVWuj3qZo",
-  authDomain: "mhfactvsmitosgame.firebaseapp.com",
-  databaseURL: "https://mhfactvsmitosgame-default-rtdb.firebaseio.com", // <-- DAH DITAMBAH DI SINI
-  projectId: "mhfactvsmitosgame",
-  storageBucket: "mhfactvsmitosgame.firebasestorage.app",
-  messagingSenderId: "378342614294",
-  appId: "1:378342614294:web:8c640ffcb7b314769e9c37",
-  measurementId: "G-EDSGHKYHEG"
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyBNWq38qyVMnJvd2Px3rIU5X-SVWuj3qZo",
+      authDomain: "mhfactvsmitosgame.firebaseapp.com",
+      databaseURL: "https://mhfactvsmitosgame-default-rtdb.firebaseio.com",
+      projectId: "mhfactvsmitosgame",
+      storageBucket: "mhfactvsmitosgame.firebasestorage.app",
+      messagingSenderId: "378342614294",
+      appId: "1:378342614294:web:8c640ffcb7b314769e9c37",
+      measurementId: "G-EDSGHKYHEG"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // BANK 50 SOALAN KESIHATAN MENTAL (BEGINNER VS ADVANCE)
+    const allQuestions = {
+      beginner: [
+        { q: "Masalah kesihatan mental adalah tanda kelemahan diri atau kurang iman.", ans: "MITOS", exp: "Masalah kesihatan mental adalah gangguan kesihatan biologikal & psikologi, bukan berpunca daripada kelemahan watak." },
+        { q: "Orang yang ada masalah kesihatan mental boleh pulih dan menjalani kehidupan produktif.", ans: "FAKTA", exp: "Dengan rawatan, terapi, dan sokongan yang betul, ramai individu pulih sepenuhnya." },
+        { q: "Kanak-kanak dan remaja juga boleh mengalami masalah kesihatan mental.", ans: "FAKTA", exp: "Separuh daripada masalah kesihatan mental bermula seawal usia 14 tahun." },
+        { q: "Pesakit mental kerap bertindak ganas dan berbahaya kepada orang sekeliling.", ans: "MITOS", exp: "Kebanyakan orang dengan masalah kesihatan mental tidak ganas; mereka lebih cenderung menjadi mangsa berbanding pelaku." },
+        { q: "Tidur yang tidak mencukupi secara berterusan boleh menjejaskan kesihatan mental.", ans: "FAKTA", exp: "Gangguan tidur berkait rapat dengan peningkatan risiko kemurungan dan keresahan." },
+        { q: "Kemurungan (Depression) sama sahaja dengan perasaan sedih biasa.", ans: "MITOS", exp: "Sedih adalah emosi sementara, manakala kemurungan adalah gangguan perubatan berterusan melebihi 2 minggu." },
+        { q: "Orang yang murung hanya perlu 'fikir positif' untuk sembuh.", ans: "MITOS", exp: "Kemurungan melibatkan ketidakseimbangan kimia otak dan neurobiologi, bukan sekadar daya pemikiran." },
+        { q: "Senaman fizikal secara berkala boleh membantu mengurangkan simptom kemurungan ringan.", ans: "FAKTA", exp: "Senaman merembeskan hormon endorfin yang meningkatkan mood." },
+        { q: "Penggunaan media sosial secara berlebihan boleh meningkatkan risiko kemurungan dalam kalangan remaja.", ans: "FAKTA", exp: "Perbandingan sosial tidak sihat dan buli siber di media sosial kerap menjejaskan emosi." },
+        { q: "Luahan emosi melalui penulisan (journaling) boleh membantu mengurangkan tekanan.", ans: "FAKTA", exp: "Menulis membantu memproses emosi yang bercelaru dan memberi ruang refleksi diri yang positif." },
+        { q: "Semua jenis tekanan (stress) adalah buruk dan merosakkan kesihatan.", ans: "MITOS", exp: "Ada tekanan positif (eustress) yang membantu memberi motivasi dan fokus, contohnya sebelum peperiksaan." },
+        { q: "Buli siber (cyberbullying) boleh memberi kesan emosi yang sama beratnya dengan buli fizikal.", ans: "FAKTA", exp: "Buli siber berlaku tanpa henti di ruang digital dan boleh membawa kepada kemurungan teruk." },
+        { q: "Menjadi pendengar yang baik tanpa menghakimi adalah langkah asas pertolongan cemas mental.", ans: "FAKTA", exp: "Mendengar secara aktif membolehkan individu merasa dihargai dan selamat berkongsi masalah." },
+        { q: "Menangis adalah saluran yang sihat untuk melepaskan tekanan emosi.", ans: "FAKTA", exp: "Air mata emosi mengandungi hormon tekanan yang dirembeskan keluar dari badan semasa menangis." },
+        { q: "Kesihatan mental adalah sama pentingnya dengan kesihatan fizikal kita.", ans: "FAKTA", exp: "'No health without mental health' — Kesihatan fizikal dan mental saling mempengaruhi." }
+      ],
+      advance: [
+        { q: "Bertanya secara terus kepada seseorang tentang niat bunuh diri akan mendesak mereka berbuat demikian.", ans: "MITOS", exp: "Bertanya secara empati sebenarnya memberi peluang kepada mereka untuk luahkan perasaan dan dapatkan bantuan." },
+        { q: "Kaunselor dan Psikologi Klinikal adalah dua profesion yang berbeza.", ans: "FAKTA", exp: "Kaunselor fokus kepada bimbingan/pembangunan diri, manakala Psikologi Klinikal merawat & mendiagnosis penyakit mental." },
+        { q: "Serangan panik (Panic Attack) boleh menyebabkan simptom fizikal seperti kesukaran bernafas.", ans: "FAKTA", exp: "Sistem saraf bertindak balas seolah-olah ada bahaya fizikal, menyebabkan jantung berdegup pantas dan nafas laju." },
+        { q: "Kemurungan pascanatal (Postpartum Depression) hanya boleh dialami oleh ibu baru melahirkan.", ans: "MITOS", exp: "Kajian menunjukkan bapa juga boleh mengalami kemurungan pascanatal akibat tekanan dan persekitaran baru." },
+        { q: "Ubat psikiatri akan menyebabkan seseorang menjadi penagih ubat selamanya.", ans: "MITOS", exp: "Ubat psikiatri diambil atas preskripsi doktor untuk memulihkan fungsi otak dan boleh dihentikan secara berfasa." },
+        { q: "Psikiatri adalah doktor perubatan yang berhak mempreskripsikan ubat-ubatan.", ans: "FAKTA", exp: "Psikiatri adalah doktor pakar perubatan (Medical Doctor), berbeza dengan Psikologi atau Kaunselor." },
+        { q: "Sekiranya berasa sudah sembuh, pesakit boleh menghentikan ubat serta-merta.", ans: "MITOS", exp: "Menghentikan ubat secara mendadak boleh menyebabkan withdrawal symptoms atau serangan penyakit berulang." },
+        { q: "Terapi tingkah laku kognitif (CBT) adalah salah satu kaedah rawatan berkesan untuk keresahan.", ans: "FAKTA", exp: "CBT membantu mengenal pasti dan merubah corak pemikiran tidak sihat." },
+        { q: "Ubat psikiatri berfungsi serta-merta sejurus selepas dimakan pada hari pertama.", ans: "MITOS", exp: "Kebanyakan ubat psikiatri mengambil masa 2 hingga 4 minggu untuk menunjukkan kesan optimum." },
+        { q: "Bipolar Disorder bermaksud seseorang hanya mempunyai mood yang berubah-ubah dalam beberapa minit.", ans: "MITOS", exp: "Bipolar melibatkan pusingan episod mania dan kemurungan yang berlanjutan selama beberapa hari/minggu." },
+        { q: "Obsessive-Compulsive Disorder (OCD) hanya berkait rapat dengan sifat pembersih atau kekemasan.", ans: "MITOS", exp: "OCD merangkumi pelbagai jenis fikiran obsesif dan tingkah laku kompulsif, bukan sekadar isu kebersihan." },
+        { q: "Talian HEAL 15555 di Malaysia adalah talian bantuan krisis kesihatan mental percuma.", ans: "FAKTA", exp: "Talian KKM ini beroperasi untuk memberi sokongan emosi dan kaunseling percuma." },
+        { q: "Schizophrenia adalah penyakit 'personaliti berganda' (multiple personality).", ans: "MITOS", exp: "Schizophrenia ialah gangguan psikosis (halusinasi/delusi), manakala personaliti berganda ialah DID." },
+        { q: "Post-Traumatic Stress Disorder (PTSD) hanya berlaku kepada tentera yang pernah berperang.", ans: "MITOS", exp: "PTSD boleh berlaku kepada sesiapa yang mengalami kemalangan, bencana, penderaan, atau peristiwa traumatik." },
+        { q: "Teknik pernafasan 4-7-8 boleh membantu menenangkan sistem saraf semasa panik.", ans: "FAKTA", exp: "Teknik ini mengaktifkan sistem saraf parasimpatetik untuk menurunkan kadar degupan jantung." }
+      ]
+    };
+
+    let selectedLevel = 'beginner';
+    let questions = allQuestions[selectedLevel];
     let gamePin = Math.floor(100000 + Math.random() * 900000).toString();
-    let questions = [
-      { q: "Masalah kesihatan mental adalah tanda kelemahan diri atau kurang iman.", ans: "MITOS", exp: "Masalah kesihatan mental adalah gangguan kesihatan biologikal & psikologi, bukan berpunca daripada kelemahan watak." },
-      { q: "Orang yang ada masalah kesihatan mental boleh pulih dan menjalani kehidupan produktif.", ans: "FAKTA", exp: "Dengan rawatan, terapi, dan sokongan yang betul, ramai individu pulih sepenuhnya." },
-      { q: "Tidur yang tidak mencukupi secara berterusan boleh menjejaskan kesihatan mental.", ans: "FAKTA", exp: "Gangguan tidur berkait rapat dengan peningkatan risiko kemurungan dan keresahan." }
-    ];
     let currentQ = 0;
     let timerInterval;
 
     document.getElementById('pinDisplay').innerText = gamePin;
 
-    // Tetapkan Tetapan Asas
+    function selectDifficulty(level) {
+      selectedLevel = level;
+      questions = allQuestions[selectedLevel];
+      
+      const btnB = document.getElementById('btnBeginner');
+      const btnA = document.getElementById('btnAdvance');
+      
+      if(level === 'beginner') {
+        btnB.className = "flex-1 bg-teal-600 border-2 border-teal-300 py-2 rounded-xl text-xs font-bold shadow-md transition";
+        btnA.className = "flex-1 bg-slate-800 border border-slate-600 py-2 rounded-xl text-xs font-bold text-slate-400 shadow-md transition";
+      } else {
+        btnA.className = "flex-1 bg-indigo-600 border-2 border-indigo-300 py-2 rounded-xl text-xs font-bold shadow-md transition";
+        btnB.className = "flex-1 bg-slate-800 border border-slate-600 py-2 rounded-xl text-xs font-bold text-slate-400 shadow-md transition";
+      }
+    }
+
+    // Tetapkan Tetapan Asas dalam Firebase
     db.ref(`games/${gamePin}/settings`).set({ showQuestionOnPhone: true });
 
     db.ref(`games/${gamePin}/players`).on('value', snapshot => {
@@ -209,11 +287,9 @@
             db.ref(`games/${gamePin}/players/${pid}/score`).transaction(s => (s || 0) + 100);
           }
         }
-        // Padam jawapan fasa lepas
         db.ref(`games/${gamePin}/answers`).remove();
       });
 
-      // Panggil Leaderboard
       setTimeout(updateLeaderboard, 500);
     }
 
@@ -240,7 +316,6 @@
       }
     }
 
-    // Tentukan Tamat Permainan & Hantar Sijil Pemenang
     function forceEndGame() {
       clearInterval(timerInterval);
       db.ref(`games/${gamePin}/players`).once('value', snapshot => {
@@ -252,10 +327,9 @@
           winners[id] = { rank: index + 1, name: data.name, score: data.score || 0 };
         });
 
-        // Hantar Isyarat Game Ended ke semua skrin pemain
         db.ref(`games/${gamePin}/status`).set({ state: 'ENDED', winners: winners });
         alert("Permainan Telah Ditamatkan! Skrin pemenang kini dipaparkan di peranti pemain.");
-        location.reload(); // Reset hos untuk pusingan baru
+        location.reload();
       });
     }
   </script>
