@@ -241,7 +241,7 @@
     const db = firebase.database();
 
     // ----------------------------------------------------
-    // WEB AUDIO API SYSTEM (DENGAN KAWALAN SFX VOLUME)
+    // WEB AUDIO API SYSTEM (DENGAN DRUM ROLL DITINGKATKAN)
     // ----------------------------------------------------
     let audioCtx = null;
     function getAudioContext() {
@@ -276,8 +276,8 @@
         let osc = ctx.createOscillator();
         let gain = ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, ctx.currentTime);
-        gain.gain.setValueAtTime(0.08 * sfxMult, ctx.currentTime);
+        osc.frequency.setValueAtTime(850, ctx.currentTime);
+        gain.gain.setValueAtTime(0.1 * sfxMult, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
         osc.connect(gain);
         gain.connect(ctx.destination);
@@ -298,16 +298,17 @@
           let gain = ctx.createGain();
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(freq, ctx.currentTime + (idx * 0.08));
-          gain.gain.setValueAtTime(0.15 * sfxMult, ctx.currentTime + (idx * 0.08));
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (idx * 0.08) + 0.3);
+          gain.gain.setValueAtTime(0.2 * sfxMult, ctx.currentTime + (idx * 0.08));
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (idx * 0.08) + 0.35);
           osc.connect(gain);
           gain.connect(ctx.destination);
           osc.start(ctx.currentTime + (idx * 0.08));
-          osc.stop(ctx.currentTime + (idx * 0.08) + 0.3);
+          osc.stop(ctx.currentTime + (idx * 0.08) + 0.35);
         });
       } catch(e){}
     }
 
+    // FUNGSI DRUM ROLL BERKUASA
     function playDrumRoll(durationMs = 3000) {
       try {
         let sfxMult = getSfxVolume();
@@ -316,10 +317,11 @@
         let ctx = getAudioContext();
         let startTime = ctx.currentTime;
         let endTime = startTime + (durationMs / 1000);
-        let interval = 0.05;
+        let interval = 0.025; // Ketukan super laju
         
         for (let t = startTime; t < endTime; t += interval) {
-          let bufferSize = ctx.sampleRate * 0.03;
+          // Snare Noise Layer
+          let bufferSize = ctx.sampleRate * 0.04;
           let buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
           let output = buffer.getChannelData(0);
           for (let i = 0; i < bufferSize; i++) {
@@ -329,20 +331,32 @@
           whiteNoise.buffer = buffer;
           
           let filter = ctx.createBiquadFilter();
-          filter.type = 'lowpass';
-          filter.frequency.value = 180 + Math.random() * 40;
+          filter.type = 'highpass';
+          filter.frequency.value = 1000;
 
           let gain = ctx.createGain();
           let progress = (t - startTime) / (endTime - startTime);
-          gain.gain.setValueAtTime((0.02 + (progress * 0.25)) * sfxMult, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+          gain.gain.setValueAtTime((0.1 + (progress * 0.5)) * sfxMult, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
 
           whiteNoise.connect(filter);
           filter.connect(gain);
           gain.connect(ctx.destination);
-
           whiteNoise.start(t);
-          whiteNoise.stop(t + 0.03);
+          whiteNoise.stop(t + 0.04);
+
+          // Bass Thump Layer
+          let osc = ctx.createOscillator();
+          let oscGain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(120, t);
+          osc.frequency.exponentialRampToValueAtTime(40, t + 0.04);
+          oscGain.gain.setValueAtTime((0.15 + (progress * 0.4)) * sfxMult, t);
+          oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+          osc.connect(oscGain);
+          oscGain.connect(ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.04);
         }
       } catch(e){}
     }
@@ -353,7 +367,7 @@
         if(sfxMult <= 0) return;
 
         let ctx = getAudioContext();
-        let bufferSize = ctx.sampleRate * 1.5;
+        let bufferSize = ctx.sampleRate * 2.0;
         let buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
         let output = buffer.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) {
@@ -365,18 +379,18 @@
 
         let filter = ctx.createBiquadFilter();
         filter.type = 'highpass';
-        filter.frequency.value = 4000;
+        filter.frequency.value = 3500;
 
         let gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.4 * sfxMult, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
+        gain.gain.setValueAtTime(0.8 * sfxMult, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.0);
 
         cymbal.connect(filter);
         filter.connect(gain);
         gain.connect(ctx.destination);
 
         cymbal.start();
-        cymbal.stop(ctx.currentTime + 1.5);
+        cymbal.stop(ctx.currentTime + 2.0);
       } catch(e){}
     }
 
