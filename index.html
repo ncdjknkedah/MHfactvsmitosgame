@@ -23,7 +23,7 @@
 </head>
 <body class="bg-gradient-to-br from-indigo-950 via-purple-900 to-fuchsia-950 min-h-screen text-white font-sans flex flex-col justify-between p-6 overflow-x-hidden">
 
-  <!-- Audio Elements (Membaca fail bgm.mp3 di GitHub anda) -->
+  <!-- Audio Elements -->
   <audio id="bgMusic" loop preload="auto" src="bgm.mp3"></audio>
 
   <!-- Header -->
@@ -113,7 +113,7 @@
         <div id="timer" class="text-3xl font-black text-amber-300 bg-slate-950 w-16 h-16 rounded-full flex items-center justify-center border-4 border-amber-400 shadow-xl shadow-amber-400/30">20</div>
         
         <button onclick="forceEndGame()" class="bg-rose-600/80 hover:bg-rose-600 border border-rose-400 px-4 py-2 rounded-full text-xs font-extrabold flex items-center gap-1 shadow-md">
-          <i class="fa-solid fa-power-off"></i> Tamat Segera
+          <i class="fa-solid fa-power-off"></i> Henti Segera
         </button>
       </div>
 
@@ -146,9 +146,20 @@
           Seterusnya <i class="fa-solid fa-arrow-right ml-1"></i>
         </button>
         <button onclick="forceEndGame()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-6 py-3 rounded-full text-md shadow-lg">
-          Tamat & Buka Pusingan Baru
+          Henti & Sedia Umum Pemenang
         </button>
       </div>
+    </div>
+
+    <!-- PRE-ANNOUNCEMENT SCREEN (BUTANG UMUM PEMENANG) -->
+    <div id="preAnnounceScreen" class="hidden w-full max-w-xl text-center bg-purple-950/90 p-8 rounded-3xl border-2 border-amber-400 backdrop-blur-2xl shadow-2xl">
+      <div class="text-6xl mb-3 animate-bounce">🏆</div>
+      <h2 class="text-3xl font-black text-amber-300 mb-2">PERMAINAN TAMAT!</h2>
+      <p class="text-sm text-purple-200 mb-6">Adakah anda sedia untuk mengetahui siapakah Juara Kesedaran Kesihatan Mental?</p>
+
+      <button id="btnAnnounce" onclick="triggerAnnounceSequence()" class="bg-gradient-to-r from-amber-400 via-pink-500 to-yellow-400 hover:scale-105 text-slate-950 font-black text-2xl px-10 py-5 rounded-full shadow-2xl shadow-amber-400/50 transition">
+        🥁 UMUM PEMENANG!
+      </button>
     </div>
 
     <!-- PODIUM FINAL SCREEN (SKRIN PEMENANG AKHIR) -->
@@ -213,7 +224,7 @@
     const db = firebase.database();
 
     // ----------------------------------------------------
-    // WEB AUDIO API SYSTEM (BUNYI DETIK & CHIME REKAAN PANTAS)
+    // WEB AUDIO API SYSTEM (AUDIO DRUM ROLL, CYMBAL & TICK)
     // ----------------------------------------------------
     let audioCtx = null;
     function getAudioContext() {
@@ -226,7 +237,7 @@
       return audioCtx;
     }
 
-    // Bunyi Detik (Tick) Pemasa
+    // Bunyi Detik Pemasa
     function playTickSound() {
       try {
         let ctx = getAudioContext();
@@ -243,11 +254,11 @@
       } catch(e){}
     }
 
-    // Bunyi Chime Bila Masa Tamat / Keputusan
+    // Bunyi Chime / Papan Skor
     function playChimeSound() {
       try {
         let ctx = getAudioContext();
-        let notes = [523.25, 659.25, 783.99, 1046.50]; // Chord C Major
+        let notes = [523.25, 659.25, 783.99, 1046.50];
         notes.forEach((freq, idx) => {
           let osc = ctx.createOscillator();
           let gain = ctx.createGain();
@@ -260,6 +271,75 @@
           osc.start(ctx.currentTime + (idx * 0.08));
           osc.stop(ctx.currentTime + (idx * 0.08) + 0.3);
         });
+      } catch(e){}
+    }
+
+    // BUNYI DRUM ROLL (3 SAAT PALUAN DRAM SUSPEN)
+    function playDrumRoll(durationMs = 3000) {
+      try {
+        let ctx = getAudioContext();
+        let startTime = ctx.currentTime;
+        let endTime = startTime + (durationMs / 1000);
+        let interval = 0.05; // Selang bunyi ketukan
+        
+        for (let t = startTime; t < endTime; t += interval) {
+          let bufferSize = ctx.sampleRate * 0.03; // Ketukan pendek
+          let buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+          let output = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            output[i] = Math.random() * 2 - 1; // Noise dram
+          }
+          let whiteNoise = ctx.createBufferSource();
+          whiteNoise.buffer = buffer;
+          
+          let filter = ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.value = 180 + Math.random() * 40;
+
+          let gain = ctx.createGain();
+          // Makin nak habis makin kuat (Crescendo)
+          let progress = (t - startTime) / (endTime - startTime);
+          gain.gain.setValueAtTime(0.02 + (progress * 0.2), t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+
+          whiteNoise.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+
+          whiteNoise.start(t);
+          whiteNoise.stop(t + 0.03);
+        }
+      } catch(e){}
+    }
+
+    // BUNYI CYMBAL CRASH (HEMPASAN SIMBAL)
+    function playCymbalCrash() {
+      try {
+        let ctx = getAudioContext();
+        let bufferSize = ctx.sampleRate * 1.5; // Bunyi berpanjangan 1.5s
+        let buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        let output = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+
+        let cymbal = ctx.createBufferSource();
+        cymbal.buffer = buffer;
+
+        let filter = ctx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.value = 4000; // Frekuensi tinggi simbal
+
+        let gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
+
+        cymbal.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+
+        cymbal.start();
+        cymbal.stop(ctx.currentTime + 1.5);
       } catch(e){}
     }
 
@@ -299,7 +379,7 @@
         { q: "Talian HEAL 15555 di Malaysia adalah talian bantuan krisis kesihatan mental percuma.", ans: "FAKTA", exp: "Talian KKM ini beroperasi untuk memberi sokongan emosi dan kaunseling percuma." },
         { q: "Schizophrenia adalah penyakit 'personaliti berganda' (multiple personality).", ans: "MITOS", exp: "Schizophrenia ialah gangguan psikosis (halusinasi/delusi), manakala personaliti berganda ialah DID." },
         { q: "Post-Traumatic Stress Disorder (PTSD) hanya berlaku kepada tentera yang pernah berperang.", ans: "MITOS", exp: "PTSD boleh berlaku kepada sesiapa yang mengalami kemalangan, bencana, penderaan, atau peristiwa traumatik." },
-        { q: "Teknik pernafasan 4-7-8 boleh membantu menenangkan sistem saraf semasa panik.", ans: "FAKTA", exp: "Teknik ini mengaktifkan sistem saraf parasimpatetik untuk menurunkan kadar degupan jantung." }
+        { q: "Teknik pernafasan 4-7-8 boleh membantu menenangan sistem saraf semasa panik.", ans: "FAKTA", exp: "Teknik ini mengaktifkan sistem saraf parasimpatetik untuk menurunkan kadar degupan jantung." }
       ]
     };
 
@@ -309,6 +389,7 @@
     let currentQ = 0;
     let timerInterval;
     let totalPlayersCount = 0;
+    let savedWinnersData = {};
 
     document.getElementById('pinDisplay').innerText = gamePin;
 
@@ -362,7 +443,7 @@
     }
 
     function toggleAudio() {
-      getAudioContext(); // Aktifkan Audio Context
+      getAudioContext();
       const bg = document.getElementById('bgMusic');
       const icon = document.getElementById('audioIcon');
       const audioText = document.getElementById('audioText');
@@ -370,11 +451,8 @@
       if (bg.paused) {
         bg.play().then(() => {
           icon.className = "fa-solid fa-volume-high text-amber-300";
-          audioText.innerText = "Muzik dimainkan";
-        }).catch(e => {
-          console.log(e);
-          alert("Klik skrin sekali lagi untuk benarkan muzik!");
-        });
+          audioText.innerText = "Muzik Dimainkan";
+        }).catch(e => console.log(e));
       } else {
         bg.pause();
         icon.className = "fa-solid fa-volume-xmark";
@@ -420,12 +498,9 @@
       timerInterval = setInterval(() => {
         timeLeft--;
         document.getElementById('timer').innerText = timeLeft;
-        
-        // Bunyi Detik Pemasa
         if(timeLeft > 0) {
           playTickSound();
         }
-
         if(timeLeft <= 0) {
           clearInterval(timerInterval);
           showResult();
@@ -434,9 +509,7 @@
     }
 
     function showResult() {
-      // Mainkan Bunyi Chime
       playChimeSound();
-
       document.getElementById('gameScreen').classList.add('hidden');
       document.getElementById('resultScreen').classList.remove('hidden');
       
@@ -461,7 +534,6 @@
       });
 
       db.ref(`games/${gamePin}/currentQuestion`).set({ state: 'SHOW_RESULT', correctAns: q.ans });
-
       setTimeout(updateLeaderboard, 600);
     }
 
@@ -490,15 +562,13 @@
     }
 
     function triggerConfettiPopper() {
-      var count = 200;
+      var count = 250;
       var defaults = { origin: { y: 0.7 } };
-
       function fire(particleRatio, opts) {
         confetti(Object.assign({}, defaults, opts, {
           particleCount: Math.floor(count * particleRatio)
         }));
       }
-
       fire(0.25, { spread: 26, startVelocity: 55 });
       fire(0.2, { spread: 60 });
       fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
@@ -506,14 +576,15 @@
       fire(0.1, { spread: 120, startVelocity: 45 });
     }
 
+    // TEKAN HENTI SEGERA -> PERGI SKRIN BUTANG "UMUM PEMENANG"
     function forceEndGame() {
       clearInterval(timerInterval);
-      playChimeSound(); // Chime penutup
-
       db.ref(`games/${gamePin}/players`).once('value', snapshot => {
         let players = snapshot.val() || {};
         let sorted = Object.entries(players).sort((a,b) => (b[1].score || 0) - (a[1].score || 0));
         
+        savedWinnersData = sorted; // Simpan data pemenang
+
         let winners = {};
         sorted.forEach(([id, data], index) => {
           winners[id] = { rank: index + 1, name: data.name, score: data.score || 0 };
@@ -521,11 +592,36 @@
 
         db.ref(`games/${gamePin}/status`).set({ state: 'ENDED', winners: winners });
 
+        // Tampilkan Skrin Pilihan "UMUM PEMENANG"
         document.getElementById('gameScreen').classList.add('hidden');
         document.getElementById('resultScreen').classList.add('hidden');
         document.getElementById('lobbyScreen').classList.add('hidden');
+        document.getElementById('preAnnounceScreen').classList.remove('hidden');
+      });
+    }
+
+    // BILA BUTANG "UMUM PEMENANG" DITEKAN: DRUM ROLL -> CYMBAL & KONFETI -> PODIUM
+    function triggerAnnounceSequence() {
+      const btn = document.getElementById('btnAnnounce');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> MENGIRA SKOR...`;
+
+      // 1. Perlahan/Hentikan Lagu Latar
+      const bg = document.getElementById('bgMusic');
+      bg.pause();
+
+      // 2. Mainkan Bunyi Drum Roll (3 Saat)
+      playDrumRoll(3000);
+
+      // 3. Selepas 3 Saat: Cymbal Crash + Konfeti + Papar Podium
+      setTimeout(() => {
+        playCymbalCrash();
+        triggerConfettiPopper();
+
+        document.getElementById('preAnnounceScreen').classList.add('hidden');
         document.getElementById('podiumScreen').classList.remove('hidden');
 
+        let sorted = savedWinnersData;
         if(sorted[0]) {
           document.getElementById('p1Name').innerText = sorted[0][1].name;
           document.getElementById('p1Score').innerText = `${sorted[0][1].score || 0} pts`;
@@ -544,9 +640,7 @@
           otherHtml += `<span class="bg-purple-900/60 border border-purple-500/30 text-purple-200 px-3 py-1 rounded-full text-xs font-semibold">#${idx + 4} ${data.name} (${data.score || 0} pts)</span>`;
         });
         document.getElementById('otherPlayersList').innerHTML = otherHtml || '<span class="text-xs text-purple-400">Tiada peserta lain</span>';
-
-        triggerConfettiPopper();
-      });
+      }, 3000);
     }
   </script>
 </body>
