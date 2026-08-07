@@ -280,14 +280,14 @@
         let ctx = getAudioContext();
         let startTime = ctx.currentTime;
         let endTime = startTime + (durationMs / 1000);
-        let interval = 0.05; // Selang bunyi ketukan
+        let interval = 0.05;
         
         for (let t = startTime; t < endTime; t += interval) {
-          let bufferSize = ctx.sampleRate * 0.03; // Ketukan pendek
+          let bufferSize = ctx.sampleRate * 0.03;
           let buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
           let output = buffer.getChannelData(0);
           for (let i = 0; i < bufferSize; i++) {
-            output[i] = Math.random() * 2 - 1; // Noise dram
+            output[i] = Math.random() * 2 - 1;
           }
           let whiteNoise = ctx.createBufferSource();
           whiteNoise.buffer = buffer;
@@ -297,7 +297,6 @@
           filter.frequency.value = 180 + Math.random() * 40;
 
           let gain = ctx.createGain();
-          // Makin nak habis makin kuat (Crescendo)
           let progress = (t - startTime) / (endTime - startTime);
           gain.gain.setValueAtTime(0.02 + (progress * 0.2), t);
           gain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
@@ -316,7 +315,7 @@
     function playCymbalCrash() {
       try {
         let ctx = getAudioContext();
-        let bufferSize = ctx.sampleRate * 1.5; // Bunyi berpanjangan 1.5s
+        let bufferSize = ctx.sampleRate * 1.5;
         let buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
         let output = buffer.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) {
@@ -328,7 +327,7 @@
 
         let filter = ctx.createBiquadFilter();
         filter.type = 'highpass';
-        filter.frequency.value = 4000; // Frekuensi tinggi simbal
+        filter.frequency.value = 4000;
 
         let gain = ctx.createGain();
         gain.gain.setValueAtTime(0.3, ctx.currentTime);
@@ -344,12 +343,13 @@
     }
 
     // ----------------------------------------------------
-    // BANK SOALAN
+    // BANK KESEMUA 30 SOALAN LENGKAP (BEGINNER & ADVANCE)
     // ----------------------------------------------------
     const allQuestions = {
       beginner: [
         { q: "Masalah kesihatan mental adalah tanda kelemahan diri atau kurang iman.", ans: "MITOS", exp: "Masalah kesihatan mental adalah gangguan kesihatan biologikal & psikologi, bukan berpunca daripada kelemahan watak." },
         { q: "Orang yang ada masalah kesihatan mental boleh pulih dan menjalani kehidupan produktif.", ans: "FAKTA", exp: "Dengan rawatan, terapi, dan sokongan yang betul, ramai individu pulih sepenuhnya." },
+        { q: "Masalah kesihatan mental adalah sangat jarang berlaku dalam kalangan masyarakat.", ans: "MITOS", exp: "Menurut WHO, 1 daripada 8 orang di seluruh dunia hidup dengan masalah kesihatan mental." },
         { q: "Kanak-kanak dan remaja juga boleh mengalami masalah kesihatan mental.", ans: "FAKTA", exp: "Separuh daripada masalah kesihatan mental bermula seawal usia 14 tahun." },
         { q: "Pesakit mental kerap bertindak ganas dan berbahaya kepada orang sekeliling.", ans: "MITOS", exp: "Kebanyakan orang dengan masalah kesihatan mental tidak ganas; mereka lebih cenderung menjadi mangsa berbanding pelaku." },
         { q: "Tidur yang tidak mencukupi secara berterusan boleh menjejaskan kesihatan mental.", ans: "FAKTA", exp: "Gangguan tidur berkait rapat dengan peningkatan risiko kemurungan dan keresahan." },
@@ -361,11 +361,11 @@
         { q: "Semua jenis tekanan (stress) adalah buruk dan merosakkan kesihatan.", ans: "MITOS", exp: "Ada tekanan positif (eustress) yang membantu memberi motivasi dan fokus, contohnya sebelum peperiksaan." },
         { q: "Buli siber (cyberbullying) boleh memberi kesan emosi yang sama beratnya dengan buli fizikal.", ans: "FAKTA", exp: "Buli siber berlaku tanpa henti di ruang digital dan boleh membawa kepada kemurungan teruk." },
         { q: "Menjadi pendengar yang baik tanpa menghakimi adalah langkah asas pertolongan cemas mental.", ans: "FAKTA", exp: "Mendengar secara aktif membolehkan individu merasa dihargai dan selamat berkongsi masalah." },
-        { q: "Menangis adalah saluran yang sihat untuk melepaskan tekanan emosi.", ans: "FAKTA", exp: "Air mata emosi mengandungi hormon tekanan yang dirembeskan keluar dari badan semasa menangis." },
         { q: "Kesihatan mental adalah sama pentingnya dengan kesihatan fizikal kita.", ans: "FAKTA", exp: "'No health without mental health' — Kesihatan fizikal dan mental saling mempengaruhi." }
       ],
       advance: [
         { q: "Bertanya secara terus kepada seseorang tentang niat bunuh diri akan mendesak mereka berbuat demikian.", ans: "MITOS", exp: "Bertanya secara empati sebenarnya memberi peluang kepada mereka untuk luahkan perasaan dan dapatkan bantuan." },
+        { q: "Masalah kesihatan mental dan penyakit mental adalah dua perkara yang sama.", ans: "MITOS", exp: "Kesihatan mental merangkumi kesejahteraan emosi harian, manakala penyakit mental adalah diagnosis klinikal tertentu." },
         { q: "Kaunselor dan Psikologi Klinikal adalah dua profesion yang berbeza.", ans: "FAKTA", exp: "Kaunselor fokus kepada bimbingan/pembangunan diri, manakala Psikologi Klinikal merawat & mendiagnosis penyakit mental." },
         { q: "Serangan panik (Panic Attack) boleh menyebabkan simptom fizikal seperti kesukaran bernafas.", ans: "FAKTA", exp: "Sistem saraf bertindak balas seolah-olah ada bahaya fizikal, menyebabkan jantung berdegup pantas dan nafas laju." },
         { q: "Kemurungan pascanatal (Postpartum Depression) hanya boleh dialami oleh ibu baru melahirkan.", ans: "MITOS", exp: "Kajian menunjukkan bapa juga boleh mengalami kemurungan pascanatal akibat tekanan dan persekitaran baru." },
@@ -378,8 +378,7 @@
         { q: "Obsessive-Compulsive Disorder (OCD) hanya berkait rapat dengan sifat pembersih atau kekemasan.", ans: "MITOS", exp: "OCD merangkumi pelbagai jenis fikiran obsesif dan tingkah laku kompulsif, bukan sekadar isu kebersihan." },
         { q: "Talian HEAL 15555 di Malaysia adalah talian bantuan krisis kesihatan mental percuma.", ans: "FAKTA", exp: "Talian KKM ini beroperasi untuk memberi sokongan emosi dan kaunseling percuma." },
         { q: "Schizophrenia adalah penyakit 'personaliti berganda' (multiple personality).", ans: "MITOS", exp: "Schizophrenia ialah gangguan psikosis (halusinasi/delusi), manakala personaliti berganda ialah DID." },
-        { q: "Post-Traumatic Stress Disorder (PTSD) hanya berlaku kepada tentera yang pernah berperang.", ans: "MITOS", exp: "PTSD boleh berlaku kepada sesiapa yang mengalami kemalangan, bencana, penderaan, atau peristiwa traumatik." },
-        { q: "Teknik pernafasan 4-7-8 boleh membantu menenangan sistem saraf semasa panik.", ans: "FAKTA", exp: "Teknik ini mengaktifkan sistem saraf parasimpatetik untuk menurunkan kadar degupan jantung." }
+        { q: "Post-Traumatic Stress Disorder (PTSD) hanya berlaku kepada tentera yang pernah berperang.", ans: "MITOS", exp: "PTSD boleh berlaku kepada sesiapa yang mengalami kemalangan, bencana, penderaan, atau peristiwa traumatik." }
       ]
     };
 
@@ -576,14 +575,13 @@
       fire(0.1, { spread: 120, startVelocity: 45 });
     }
 
-    // TEKAN HENTI SEGERA -> PERGI SKRIN BUTANG "UMUM PEMENANG"
     function forceEndGame() {
       clearInterval(timerInterval);
       db.ref(`games/${gamePin}/players`).once('value', snapshot => {
         let players = snapshot.val() || {};
         let sorted = Object.entries(players).sort((a,b) => (b[1].score || 0) - (a[1].score || 0));
         
-        savedWinnersData = sorted; // Simpan data pemenang
+        savedWinnersData = sorted;
 
         let winners = {};
         sorted.forEach(([id, data], index) => {
@@ -592,7 +590,6 @@
 
         db.ref(`games/${gamePin}/status`).set({ state: 'ENDED', winners: winners });
 
-        // Tampilkan Skrin Pilihan "UMUM PEMENANG"
         document.getElementById('gameScreen').classList.add('hidden');
         document.getElementById('resultScreen').classList.add('hidden');
         document.getElementById('lobbyScreen').classList.add('hidden');
@@ -600,20 +597,16 @@
       });
     }
 
-    // BILA BUTANG "UMUM PEMENANG" DITEKAN: DRUM ROLL -> CYMBAL & KONFETI -> PODIUM
     function triggerAnnounceSequence() {
       const btn = document.getElementById('btnAnnounce');
       btn.disabled = true;
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> MENGIRA SKOR...`;
 
-      // 1. Perlahan/Hentikan Lagu Latar
       const bg = document.getElementById('bgMusic');
       bg.pause();
 
-      // 2. Mainkan Bunyi Drum Roll (3 Saat)
       playDrumRoll(3000);
 
-      // 3. Selepas 3 Saat: Cymbal Crash + Konfeti + Papar Podium
       setTimeout(() => {
         playCymbalCrash();
         triggerConfettiPopper();
